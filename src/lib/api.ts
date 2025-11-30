@@ -75,10 +75,10 @@ export interface TelemetryResponse {
     telemetry: TelemetryPoint[];
 }
 
-export async function getDriverTelemetry(year: number, location: string, sessionType: string, driverId: string): Promise<TelemetryResponse> {
-    const res = await fetch(`${API_BASE_URL}/telemetry/${year}/${location}/${sessionType}/${driverId}`);
-    if (!res.ok) throw new Error('Failed to fetch telemetry');
-    return res.json();
+export async function getDriverTelemetry(year: number, location: string, sessionType: string, driverId: string): Promise<{ telemetry: TelemetryPoint[] }> {
+    const response = await fetch(`${API_BASE_URL}/session/${year}/${encodeURIComponent(location)}/${sessionType}/telemetry?driver=${driverId}`);
+    if (!response.ok) throw new Error('Failed to fetch telemetry');
+    return response.json();
 }
 
 export interface TrackPoint {
