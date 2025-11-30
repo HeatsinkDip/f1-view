@@ -262,8 +262,17 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
 function NewsCard({ category, title, date, image }: { category: string, title: string, date: string, image: string }) {
     return (
         <div className="group cursor-pointer">
-            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-white/10">
-                <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-white/10 bg-zinc-900">
+                <img
+                    src={image}
+                    alt={title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                    onError={(e) => {
+                        // Fallback to a solid color if image fails to load
+                        e.currentTarget.style.display = 'none';
+                    }}
+                />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
                 <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-sm">
