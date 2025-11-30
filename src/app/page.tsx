@@ -2,185 +2,201 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Activity, Map, Trophy, Timer } from "lucide-react"
+import { ArrowRight, Activity, Map, Trophy, Timer, ChevronRight, Play } from "lucide-react"
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
+        <div className="min-h-screen bg-zinc-950 text-white flex flex-col relative overflow-hidden font-sans selection:bg-red-600 selection:text-white">
             {/* Background Effects */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-[url('/hero-bg.png')] bg-cover bg-center opacity-40" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black" />
+            <div className="fixed inset-0 z-0">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/20 via-zinc-950 to-black" />
+                <div className="absolute inset-0 bg-[url('https://media.formula1.com/image/upload/f_auto,c_limit,w_1920,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Sunday/GettyImages-2186767068')] bg-cover bg-center opacity-20 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
             </div>
 
             {/* Grid Pattern Overlay */}
-            <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+            <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
             {/* Header */}
-            <header className="relative z-10 p-6 flex justify-between items-center border-b border-white/10 bg-black/50 backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black rounded-sm">F1</div>
-                    <span className="font-bold tracking-tighter text-xl">VIEW</span>
+            <header className="relative z-50 px-6 py-4 flex justify-between items-center border-b border-white/5 bg-zinc-950/50 backdrop-blur-md sticky top-0">
+                <div className="flex items-center gap-2 group cursor-pointer">
+                    <div className="w-10 h-10 bg-red-600 text-white flex items-center justify-center font-black rounded-sm transform group-hover:skew-x-[-10deg] transition-transform duration-300 shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+                        <span className="transform group-hover:skew-x-[10deg]">F1</span>
+                    </div>
+                    <span className="font-black tracking-tighter text-2xl italic">VIEW</span>
                 </div>
-                <nav className="hidden md:flex gap-6 text-sm font-medium text-zinc-400">
-                    <Link href="#" className="hover:text-white transition-colors">Features</Link>
-                    <Link href="#" className="hover:text-white transition-colors">Telemetry</Link>
-                    <Link href="#" className="hover:text-white transition-colors">About</Link>
+                <nav className="hidden md:flex gap-8 text-sm font-bold uppercase tracking-widest text-zinc-400">
+                    <Link href="#features" className="hover:text-white transition-colors hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">Features</Link>
+                    <Link href="#telemetry" className="hover:text-white transition-colors hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">Telemetry</Link>
+                    <Link href="#analysis" className="hover:text-white transition-colors hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">Analysis</Link>
                 </nav>
-                <Button asChild variant="outline" className="border-white/20 hover:bg-white hover:text-black transition-all">
-                    <Link href="/dashboard">Launch App</Link>
-                </Button>
+                <div className="flex items-center gap-4">
+                    <Button asChild variant="ghost" className="hidden md:inline-flex text-zinc-400 hover:text-white hover:bg-white/5">
+                        <Link href="https://github.com/dipayon-dip/f1-view" target="_blank">GitHub</Link>
+                    </Button>
+                    <Button asChild className="bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-wider px-6 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105">
+                        <Link href="/dashboard">Launch App</Link>
+                    </Button>
+                </div>
             </header>
 
             {/* Hero Section */}
-            <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center p-6 pt-32 pb-24">
-                <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-zinc-400 mb-4 backdrop-blur-md">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 pt-20 pb-32">
+                <div className="max-w-5xl space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/10 border border-red-600/20 text-xs font-bold text-red-500 mb-4 backdrop-blur-md uppercase tracking-widest animate-pulse">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                         Live Telemetry Available
                     </div>
 
-                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] drop-shadow-2xl">
-                        RACE DATA <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">
-                            REIMAGINED
+                    <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] drop-shadow-2xl italic uppercase">
+                        Race Data <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500 relative">
+                            Unleashed
+                            <div className="absolute -inset-1 bg-gradient-to-r from-red-600/20 to-blue-600/20 blur-3xl -z-10" />
                         </span>
                     </h1>
 
-                    <p className="text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-                        Experience Formula 1 like never before. Professional-grade telemetry,
-                        real-time track visualization, and deep performance analytics in a
-                        premium interface.
+                    <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-medium">
+                        The ultimate Formula 1 companion. Professional-grade telemetry,
+                        real-time track visualization, and deep performance analytics.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                        <Button asChild size="lg" className="h-14 px-8 text-lg bg-white text-black hover:bg-zinc-200 transition-all group">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+                        <Button asChild size="lg" className="h-16 px-10 text-xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-wider shadow-[0_0_30px_rgba(220,38,38,0.4)] transition-all hover:scale-105 group rounded-xl">
                             <Link href="/dashboard">
                                 Enter Paddock
-                                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <ChevronRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </Button>
-                        <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-white/20 hover:bg-white/10 backdrop-blur-sm">
-                            <Link href="https://github.com/theOehrly/Fast-F1" target="_blank">
-                                View Data Source
+                        <Button asChild size="lg" variant="outline" className="h-16 px-10 text-xl border-zinc-700 hover:bg-white/5 hover:border-white text-zinc-300 hover:text-white font-bold uppercase tracking-wider backdrop-blur-sm rounded-xl transition-all">
+                            <Link href="/session/2024/Lusail/Race">
+                                View Demo
                             </Link>
                         </Button>
                     </div>
                 </div>
 
                 {/* Feature Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-32 max-w-5xl w-full animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-200">
+                <div id="features" className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-40 max-w-6xl w-full">
                     <FeatureCard
-                        icon={<Activity className="w-6 h-6 text-red-500" />}
+                        icon={<Activity className="w-8 h-8 text-red-500" />}
                         title="Live Telemetry"
-                        description="Real-time speed, throttle, brake, and RPM data visualization."
+                        description="Real-time speed, throttle, brake, and RPM data visualization directly from the track."
                     />
                     <FeatureCard
-                        icon={<Map className="w-6 h-6 text-blue-500" />}
+                        icon={<Map className="w-8 h-8 text-blue-500" />}
                         title="Track Dominance"
-                        description="Interactive track maps with speed heatmaps and driver comparison."
+                        description="Interactive track maps with sector analysis and driver comparison overlays."
                     />
                     <FeatureCard
-                        icon={<Timer className="w-6 h-6 text-yellow-500" />}
-                        title="Gap Analysis"
-                        description="Precise lap time comparison and sector performance breakdown."
+                        icon={<Trophy className="w-8 h-8 text-yellow-500" />}
+                        title="Championship"
+                        description="Live standings, points analysis, and constructor battle tracking."
                     />
                 </div>
 
                 {/* Latest News Section */}
-                <div className="mt-32 w-full max-w-6xl">
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-center mb-12">
-                        LATEST INSIGHTS
-                    </h2>
+                <div className="mt-40 w-full max-w-7xl">
+                    <div className="flex items-end justify-between mb-12 px-4">
+                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic">
+                            Latest <span className="text-red-600">Insights</span>
+                        </h2>
+                        <Button variant="link" className="text-zinc-400 hover:text-white uppercase tracking-widest font-bold hidden md:flex">
+                            View All News <ArrowRight className="ml-2 w-4 h-4" />
+                        </Button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <NewsCard
                             category="TECHNICAL"
                             title="The Aerodynamic Evolution of the 2025 Front Wing"
                             date="Nov 29, 2024"
-                            image="https://images.unsplash.com/photo-1599474924187-334a4ae513df?auto=format&fit=crop&w=800&q=80"
+                            image="https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Friday/GettyImages-2186453068"
                         />
                         <NewsCard
                             category="STRATEGY"
-                            title="Undercut vs Overcut: Analyzing Tire Degradation at Monaco"
+                            title="Undercut vs Overcut: Analyzing Tire Degradation at Lusail"
                             date="Nov 28, 2024"
-                            image="https://images.unsplash.com/photo-1532906619279-a782604d7c57?auto=format&fit=crop&w=800&q=80"
+                            image="https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Friday/GettyImages-2186464733"
                         />
                     </div>
                 </div>
 
                 {/* Top Contenders Section */}
-                <div className="mt-32 w-full max-w-6xl">
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-center mb-12">
-                        TOP CONTENDERS
+                <div className="mt-40 w-full max-w-7xl">
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-center mb-16 uppercase italic">
+                        Championship <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">Leaders</span>
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
                         <DriverCard
                             name="Max Verstappen"
                             team="Red Bull Racing"
-                            points={575}
-                            image="https://images.unsplash.com/photo-1632223867252-257a06655b36?auto=format&fit=crop&w=800&q=80"
+                            points={429}
+                            image="https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/2col/image.png"
                             rank={1}
+                            color="bg-blue-600"
                         />
                         <DriverCard
                             name="Lando Norris"
                             team="McLaren"
-                            points={395}
-                            image="https://images.unsplash.com/photo-1696446808759-398a9643f26e?auto=format&fit=crop&w=800&q=80"
+                            points={349}
+                            image="https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png.transform/2col/image.png"
                             rank={2}
+                            color="bg-orange-500"
                         />
                         <DriverCard
-                            name="Lewis Hamilton"
-                            team="Mercedes"
-                            points={234}
-                            image="https://images.unsplash.com/photo-1599474924187-334a4ae513df?auto=format&fit=crop&w=800&q=80"
+                            name="Charles Leclerc"
+                            team="Ferrari"
+                            points={341}
+                            image="https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/2col/image.png"
                             rank={3}
+                            color="bg-red-600"
                         />
                     </div>
                 </div>
 
                 {/* Technical Analysis Section */}
-                <div className="mt-32 w-full max-w-7xl px-6">
+                <div id="analysis" className="mt-40 w-full max-w-7xl px-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                         <div className="relative group">
-                            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-700" />
-                            <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-[4/3]">
+                            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 group-hover:opacity-40 blur-2xl transition-opacity duration-700" />
+                            <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-[4/3] shadow-2xl">
                                 <img
-                                    src="https://images.unsplash.com/photo-1532906619279-a782604d7c57?auto=format&fit=crop&w=1200&q=80"
+                                    src="https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Friday/GettyImages-2186464733"
                                     alt="Technical Analysis"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                                <div className="absolute bottom-6 left-6">
-                                    <div className="flex items-center gap-2 text-blue-400 font-mono text-xs uppercase tracking-widest mb-2">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                                <div className="absolute bottom-8 left-8">
+                                    <div className="flex items-center gap-2 text-blue-400 font-mono text-xs uppercase tracking-widest mb-3">
                                         <Activity className="w-4 h-4" />
                                         Telemetry Data
                                     </div>
-                                    <div className="text-2xl font-bold">Precision Engineering</div>
+                                    <div className="text-3xl font-black italic uppercase">Precision Engineering</div>
                                 </div>
                             </div>
                         </div>
                         <div className="space-y-8">
-                            <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
-                                BEYOND THE <br />
+                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] uppercase italic">
+                                Beyond The <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
-                                    VISIBLE SPECTRUM
+                                    Visible
                                 </span>
                             </h2>
-                            <p className="text-xl text-zinc-400 leading-relaxed">
+                            <p className="text-xl text-zinc-400 leading-relaxed font-medium">
                                 Dive deep into the data that powers champions. Analyze tire degradation curves,
                                 fuel load effects, and aerodynamic efficiency with our professional-grade telemetry tools.
                             </p>
                             <div className="grid grid-cols-2 gap-6">
-                                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                                    <div className="text-3xl font-black text-white mb-1">ms</div>
-                                    <div className="text-xs font-mono text-zinc-500 uppercase">Latency</div>
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                    <div className="text-4xl font-black text-white mb-1">1ms</div>
+                                    <div className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Latency</div>
                                 </div>
-                                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                                    <div className="text-3xl font-black text-white mb-1">1k+</div>
-                                    <div className="text-xs font-mono text-zinc-500 uppercase">Data Points</div>
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                    <div className="text-4xl font-black text-white mb-1">1M+</div>
+                                    <div className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Data Points</div>
                                 </div>
                             </div>
-                            <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Button asChild size="lg" className="h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-blue-900/20">
                                 <Link href="/dashboard">Explore Telemetry</Link>
                             </Button>
                         </div>
@@ -188,22 +204,22 @@ export default function LandingPage() {
                 </div>
 
                 {/* Circuit Spotlight */}
-                <div className="mt-32 w-full relative h-[600px] flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center fixed-bg" />
-                    <div className="absolute inset-0 bg-black/60" />
-                    <div className="relative z-10 text-center max-w-4xl px-6">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/20 border border-red-600/50 text-red-500 font-bold uppercase tracking-widest text-sm mb-8">
+                <div className="mt-40 w-full relative h-[700px] flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('https://media.formula1.com/image/upload/f_auto,c_limit,w_1920,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Thursday/GettyImages-2186156868')] bg-cover bg-center fixed-bg transform scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/80" />
+                    <div className="relative z-10 text-center max-w-5xl px-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/20 border border-red-600/50 text-red-500 font-bold uppercase tracking-widest text-sm mb-8 backdrop-blur-md">
                             <Map className="w-4 h-4" />
                             Circuit Spotlight
                         </div>
-                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-white mb-8">
-                            MONACO GP
+                        <h2 className="text-6xl md:text-9xl font-black tracking-tighter text-white mb-8 uppercase italic drop-shadow-2xl">
+                            LUSAIL
                         </h2>
-                        <p className="text-2xl text-zinc-300 max-w-2xl mx-auto mb-12">
-                            Master the streets of Monte Carlo. Every corner, every curb, every millisecond analyzed.
+                        <p className="text-2xl md:text-3xl text-zinc-200 max-w-3xl mx-auto mb-12 font-medium leading-tight drop-shadow-lg">
+                            Master the high-speed corners of Qatar. Every curb, every millisecond analyzed under the lights.
                         </p>
-                        <Button asChild size="lg" className="h-16 px-10 text-xl bg-white text-black hover:bg-zinc-200 rounded-full">
-                            <Link href="/session/2025/Monaco/Race">
+                        <Button asChild size="lg" className="h-20 px-12 text-2xl bg-white text-black hover:bg-zinc-200 rounded-full font-black uppercase tracking-wider shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105">
+                            <Link href="/session/2024/Lusail/Race">
                                 View Track Analysis
                             </Link>
                         </Button>
@@ -211,27 +227,28 @@ export default function LandingPage() {
                 </div>
 
                 {/* Season Highlights */}
-                <div className="mt-32 w-full max-w-6xl mb-24">
-                    <div className="rounded-3xl bg-zinc-900/50 border border-white/10 p-8 md:p-12 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-                        <div className="relative z-10 flex flex-col md:flex-row items-center gap-12">
-                            <div className="flex-1 space-y-6">
-                                <h2 className="text-3xl md:text-4xl font-black tracking-tighter">
-                                    SEASON HIGHLIGHTS
+                <div className="mt-40 w-full max-w-7xl mb-32 px-6">
+                    <div className="rounded-[2.5rem] bg-zinc-900/50 border border-white/10 p-8 md:p-16 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-600/20 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2 group-hover:bg-red-600/30 transition-colors duration-1000" />
+                        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-16">
+                            <div className="flex-1 space-y-8">
+                                <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic leading-none">
+                                    Season <br />
+                                    <span className="text-red-600">Highlights</span>
                                 </h2>
-                                <p className="text-zinc-400 text-lg leading-relaxed">
+                                <p className="text-zinc-400 text-xl leading-relaxed font-medium">
                                     Relive the most intense moments of the 2024 season. From photo-finish victories to strategic masterclasses,
                                     analyze every overtake and pit stop with our advanced replay tools.
                                 </p>
-                                <Button asChild variant="outline" className="border-white/20 hover:bg-white hover:text-black">
+                                <Button asChild variant="outline" size="lg" className="h-14 px-8 border-white/20 hover:bg-white hover:text-black text-lg font-bold uppercase tracking-wider rounded-xl">
                                     <Link href="/dashboard">Watch Replays</Link>
                                 </Button>
                             </div>
-                            <div className="flex-1 w-full aspect-video bg-zinc-950 rounded-xl border border-white/10 flex items-center justify-center relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516216628259-9474d32dce20?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center opacity-50 group-hover:scale-105 transition-transform duration-700" />
-                                <div className="absolute inset-0 bg-black/50" />
-                                <div className="relative z-10 w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform cursor-pointer">
-                                    <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
+                            <div className="flex-1 w-full aspect-video bg-zinc-950 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden group cursor-pointer shadow-2xl">
+                                <div className="absolute inset-0 bg-[url('https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Sunday/GettyImages-2186767068')] bg-cover bg-center opacity-60 group-hover:scale-105 transition-transform duration-700" />
+                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                                <div className="relative z-10 w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                                    <Play className="w-8 h-8 text-white fill-white ml-1" />
                                 </div>
                             </div>
                         </div>
@@ -240,8 +257,19 @@ export default function LandingPage() {
             </main>
 
             {/* Footer */}
-            <footer className="relative z-10 border-t border-white/10 bg-black/50 p-6 text-center text-zinc-600 text-sm">
-                <p>© 2025 F1 View. Not affiliated with Formula 1 World Championship Ltd.</p>
+            <footer className="relative z-10 border-t border-white/5 bg-zinc-950 p-12">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-zinc-800 text-white flex items-center justify-center font-black rounded-sm">F1</div>
+                        <span className="font-bold tracking-tighter text-xl text-zinc-500">VIEW</span>
+                    </div>
+                    <p className="text-zinc-600 text-sm font-medium">© 2025 F1 View. Not affiliated with Formula 1 World Championship Ltd.</p>
+                    <div className="flex gap-6 text-zinc-500">
+                        <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link href="#" className="hover:text-white transition-colors">Terms</Link>
+                        <Link href="#" className="hover:text-white transition-colors">Contact</Link>
+                    </div>
+                </div>
             </footer>
         </div>
     )
@@ -249,12 +277,12 @@ export default function LandingPage() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
     return (
-        <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left group">
-            <div className="mb-4 p-3 rounded-lg bg-black/50 w-fit group-hover:scale-110 transition-transform">
+        <div className="p-8 rounded-2xl bg-zinc-900/50 border border-white/5 hover:bg-white/5 hover:border-white/20 transition-all duration-300 text-left group hover:-translate-y-1 shadow-lg">
+            <div className="mb-6 p-4 rounded-xl bg-black/50 w-fit group-hover:scale-110 transition-transform border border-white/5 group-hover:border-white/20">
                 {icon}
             </div>
-            <h3 className="text-lg font-bold mb-2">{title}</h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">{description}</p>
+            <h3 className="text-xl font-black uppercase italic mb-3 text-zinc-200 group-hover:text-white">{title}</h3>
+            <p className="text-zinc-400 text-base leading-relaxed group-hover:text-zinc-300">{description}</p>
         </div>
     )
 }
@@ -262,53 +290,54 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
 function NewsCard({ category, title, date, image }: { category: string, title: string, date: string, image: string }) {
     return (
         <div className="group cursor-pointer">
-            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-white/10 bg-zinc-900">
+            <div className="relative aspect-video rounded-2xl overflow-hidden mb-6 border border-white/10 bg-zinc-900 shadow-xl">
                 <img
                     src={image}
                     alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"
                     onError={(e) => {
-                        // Fallback to a solid color if image fails to load
                         e.currentTarget.style.display = 'none';
                     }}
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                 <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-sm">
+                    <span className="px-3 py-1 bg-red-600 text-white text-xs font-black uppercase tracking-widest rounded-sm shadow-lg">
                         {category}
                     </span>
                 </div>
             </div>
-            <div className="flex items-center gap-2 text-zinc-500 text-xs font-mono mb-2">
+            <div className="flex items-center gap-3 text-zinc-500 text-xs font-bold tracking-widest uppercase mb-3">
                 <span>{date}</span>
-                <span>•</span>
+                <span className="w-1 h-1 rounded-full bg-zinc-700" />
                 <span>5 MIN READ</span>
             </div>
-            <h3 className="text-xl font-bold leading-tight group-hover:text-red-500 transition-colors">
+            <h3 className="text-2xl font-bold leading-tight group-hover:text-red-500 transition-colors line-clamp-2">
                 {title}
             </h3>
         </div>
     )
 }
 
-function DriverCard({ name, team, points, image, rank }: { name: string, team: string, points: number, image: string, rank: number }) {
+function DriverCard({ name, team, points, image, rank, color }: { name: string, team: string, points: number, image: string, rank: number, color: string }) {
     return (
-        <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 z-10 rounded-2xl" />
-            <div className="relative h-[400px] rounded-2xl overflow-hidden border border-white/10 bg-zinc-900">
-                <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <div className="relative group hover:-translate-y-2 transition-transform duration-500">
+            <div className={`absolute inset-0 bg-gradient-to-b ${color.replace('bg-', 'from-')} to-black/90 z-10 rounded-3xl opacity-80`} />
+            <div className="relative h-[450px] rounded-3xl overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl">
+                <img src={image} alt={name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 pt-8" />
+
                 <div className="absolute top-4 left-4 z-20">
-                    <div className="w-10 h-10 rounded-full bg-white text-black font-black flex items-center justify-center text-xl">
+                    <div className="w-12 h-12 rounded-xl bg-white text-black font-black flex items-center justify-center text-2xl shadow-lg transform -rotate-3 group-hover:rotate-0 transition-transform">
                         {rank}
                     </div>
                 </div>
-                <div className="absolute bottom-0 left-0 w-full p-6 z-20">
-                    <div className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-1">{team}</div>
-                    <h3 className="text-2xl font-black uppercase italic mb-2">{name}</h3>
+
+                <div className="absolute bottom-0 left-0 w-full p-8 z-20 bg-gradient-to-t from-black via-black/80 to-transparent pt-20">
+                    <div className="text-xs font-black uppercase tracking-widest text-white/60 mb-2">{team}</div>
+                    <h3 className="text-3xl font-black uppercase italic mb-4 leading-none text-white">{name}</h3>
                     <div className="flex items-center gap-2">
-                        <span className="text-3xl font-bold text-white">{points}</span>
-                        <span className="text-sm font-medium text-zinc-400">PTS</span>
+                        <span className={`text-4xl font-black ${color.replace('bg-', 'text-')}`}>{points}</span>
+                        <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest mt-2">PTS</span>
                     </div>
                 </div>
             </div>
