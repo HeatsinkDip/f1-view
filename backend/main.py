@@ -149,8 +149,9 @@ def get_session_drivers(year: int, location: str, session_type: str):
     except Exception as e:
         return {"error": str(e)}
 
-@app.get("/api/telemetry/{year}/{location}/{session_type}/{driver_id}")
-def get_driver_telemetry(year: int, location: str, session_type: str, driver_id: str):
+@app.get("/api/session/{year}/{location}/{session_type}/telemetry")
+def get_telemetry(year: int, location: str, session_type: str, driver: str, limit: int = 1000):
+    """Get telemetry data with optional limit for faster loading"""
     try:
         session = get_cached_session(year, location, session_type)
         
@@ -207,8 +208,8 @@ def get_track_data(year: int, location: str, session_type: str):
         lap = session.laps.pick_fastest()
         telemetry = lap.get_telemetry()
         
-        # Downsample for map rendering: Every 10th point
-        telemetry = telemetry.iloc[::10]
+        # Downsample for map rendering: Every 20th point for faster loading
+        telemetry = telemetry.iloc[::20]
         
         track_data = []
         for _, row in telemetry.iterrows():
