@@ -1,0 +1,391 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
+import Link from "next/link"
+import { ArrowLeft, Play, Pause, RotateCcw, Activity, Gauge, Wind, Radio, Flag } from "lucide-react"
+import { getSessionDetails, getSessionDrivers, getDriverTelemetry, getTrackData, SessionDetails, Driver, TelemetryPoint, TrackPoint } from "@/lib/api"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TelemetryChart } from "@/components/telemetry-chart"
+import { TrackMap } from "@/components/track-map"
+import { TelemetryHUD } from "@/components/telemetry-hud"
+import { StrategyPredictor } from "@/components/strategy-predictor"
+import { WeatherRadar } from "@/components/weather-radar"
+import { TeamRadio } from "@/components/team-radio"
+import { TyreAnalysis } from "@/components/tyre-analysis"
+import { RaceControl } from "@/components/race-control"
+import { F1Loader } from "@/components/f1-loader"
+
+export default function SessionPage() {
+    const params = useParams()
+    const year = parseInt(params.year as string)
+    const location = params.location as string
+    const sessionType = params.session_type as string
+
+    const [session, setSession] = useState<SessionDetails | null>(null)
+    const [drivers, setDrivers] = useState<Driver[]>([])
+    const [trackData, setTrackData] = useState<TrackPoint[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
+    const [telemetryData, setTelemetryData] = useState<TelemetryPoint[]>([])
+    const [telemetryLoading, setTelemetryLoading] = useState(false)
+
+    const [comparisonDriver, setComparisonDriver] = useState<string | null>(null)
+    const [comparisonTelemetryData, setComparisonTelemetryData] = useState<TelemetryPoint[]>([])
+
+    // Animation State
+    const [playbackIndex, setPlaybackIndex] = useState(0)
+    const [isPlaying, setIsPlaying] = useState(false)
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout
+        if (isPlaying) {
+            interval = setInterval(() => {
+                setPlaybackIndex(prev => {
+                    if (prev >= telemetryData.length - 1) {
+                        setIsPlaying(false)
+                        return prev
+                    }
+                    return prev + 1 // Speed up by skipping points if needed: prev + 5
+                })
+            }, 50) // 20fps
+        }
+        return () => clearInterval(interval)
+    }, [isPlaying, telemetryData.length])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [sessionData, driversData, track] = await Promise.all([
+                    getSessionDetails(year, location, sessionType),
+                    getSessionDrivers(year, location, sessionType),
+                    getTrackData(year, location, sessionType)
+                ])
+                setSession(sessionData)
+                setDrivers(driversData)
+                setTrackData(track.track_data)
+                if (driversData.length > 0) {
+                    // Default to winner or first driver
+                    setSelectedDriver(driversData[0].id)
+                }
+            } catch (err: any) {
+                setError(err.message)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [year, location, sessionType])
+
+    useEffect(() => {
+        if (!selectedDriver) return
+
+        const fetchTelemetry = async () => {
+            setTelemetryLoading(true)
+            try {
+                const data = await getDriverTelemetry(year, location, sessionType, selectedDriver)
+                setTelemetryData(data.telemetry)
+            } catch (err) {
+                console.error("Failed to load telemetry", err)
+            } finally {
+                setTelemetryLoading(false)
+            }
+        }
+
+        fetchTelemetry()
+    }, [selectedDriver, year, location, sessionType])
+
+    useEffect(() => {
+        if (!comparisonDriver) {
+            setComparisonTelemetryData([])
+            return
+        }
+
+        const fetchComparisonTelemetry = async () => {
+            try {
+                const data = await getDriverTelemetry(year, location, sessionType, comparisonDriver)
+                setComparisonTelemetryData(data.telemetry)
+            } catch (err) {
+                console.error("Failed to load comparison telemetry", err)
+            }
+        }
+
+        fetchComparisonTelemetry()
+    }, [comparisonDriver, year, location, sessionType])
+
+    if (loading) {
+        return (
+            <div className="flex h-screen items-center justify-center bg-zinc-950 text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black" />
+                <div className="relative z-10">
+                    <F1Loader />
+                </div>
+            </div>
+        )
+    }
+    if (error) return <div className="flex h-screen items-center justify-center text-red-500 bg-zinc-950">Error: {error}</div>
+
+    // Handle future sessions where data is missing
+    if (!trackData || trackData.length === 0) {
+        return (
+            <div className="min-h-screen bg-zinc-950 text-white p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black -z-10" />
+
+                <Button variant="ghost" size="sm" asChild className="absolute top-8 left-8 text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Dashboard
+                    </Link>
+                </Button>
+
+                <div className="max-w-md space-y-8 relative z-10">
+                    <div className="w-24 h-24 bg-zinc-900/50 rounded-full flex items-center justify-center mx-auto border border-zinc-800 shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+                        <Play className="w-10 h-10 text-zinc-500 ml-1" />
+                    </div>
+                    <div>
+                        <h1 className="text-5xl font-black italic uppercase mb-4 tracking-tighter">Session Upcoming</h1>
+                        <p className="text-zinc-400 text-lg">
+                            Telemetry for the <span className="text-white font-bold">{sessionType}</span> at <span className="text-white font-bold">{location}</span> is initializing.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-4 w-full">
+                        {sessionType === "Race" && (
+                            <Button asChild size="lg" className="w-full bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-wider h-14 text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-[1.02]">
+                                <Link href={`/session/${year}/${encodeURIComponent(location)}/Qualifying`}>
+                                    View Qualifying Analysis <ArrowLeft className="ml-2 w-5 h-5 rotate-180" />
+                                </Link>
+                            </Button>
+                        )}
+                        <Button asChild variant="outline" className="w-full border-zinc-800 hover:bg-zinc-900 text-zinc-400 hover:text-white uppercase tracking-wider h-12">
+                            <Link href="/dashboard">Return to Paddock</Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="min-h-screen bg-zinc-950 text-white p-4 overflow-hidden flex flex-col font-sans">
+            {/* Header */}
+            <header className="flex items-center justify-between mb-6 px-2 border-b border-zinc-800/50 pb-4">
+                <div className="flex items-center gap-6">
+                    <Button variant="ghost" size="icon" asChild className="text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full w-10 h-10">
+                        <Link href="/dashboard">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">
+                            {session?.location} <span className="text-red-600">GP</span>
+                        </h1>
+                        <div className="flex items-center gap-3 mt-1">
+                            <Badge variant="outline" className="text-xs font-mono text-zinc-400 uppercase border-zinc-700 bg-zinc-900/50 px-2 py-0.5">
+                                {session?.session_type}
+                            </Badge>
+                            <span className="text-[10px] font-mono text-red-500 flex items-center gap-1 animate-pulse">
+                                <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+                                LIVE REPLAY
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 bg-zinc-900/50 p-1 rounded-lg border border-zinc-800">
+                        <Select value={selectedDriver || ""} onValueChange={setSelectedDriver}>
+                            <SelectTrigger className="w-[200px] bg-transparent border-none text-white focus:ring-0 h-9 font-bold">
+                                <SelectValue placeholder="Driver" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                {drivers.map(d => (
+                                    <SelectItem key={d.id} value={d.id}>{d.code} - {d.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <div className="h-4 w-[1px] bg-zinc-700" />
+                        <Select value={comparisonDriver || "none"} onValueChange={(v) => setComparisonDriver(v === "none" ? null : v)}>
+                            <SelectTrigger className="w-[160px] bg-transparent border-none text-zinc-400 focus:ring-0 h-9 text-xs uppercase tracking-wider">
+                                <SelectValue placeholder="VS GHOST" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                <SelectItem value="none">NO GHOST</SelectItem>
+                                {drivers.map(d => (
+                                    <SelectItem key={d.id} value={d.id} disabled={d.id === selectedDriver}>
+                                        {d.code} - {d.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </header>
+
+            {/* Mission Control Grid - Balanced Layout */}
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-140px)] min-h-[800px]">
+
+                {/* Left Column: Track Map & Context */}
+                <div className="flex flex-col gap-6">
+                    {/* Track Map */}
+                    <div className="flex-[2] relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/20 shadow-2xl min-h-[400px]">
+                        <TrackMap
+                            data={trackData}
+                            circuitName={session?.location || "Circuit"}
+                            currentPosition={
+                                telemetryData.length > 0 && playbackIndex >= 0 && playbackIndex < telemetryData.length
+                                    ? { x: telemetryData[playbackIndex].x, y: telemetryData[playbackIndex].y }
+                                    : undefined
+                            }
+                            comparisonPosition={
+                                comparisonTelemetryData.length > 0 && playbackIndex >= 0 && playbackIndex < comparisonTelemetryData.length
+                                    ? { x: comparisonTelemetryData[playbackIndex].x, y: comparisonTelemetryData[playbackIndex].y }
+                                    : undefined
+                            }
+                            className="h-full w-full"
+                        />
+
+                        {/* Floating HUD */}
+                        <div className="absolute top-6 right-6 z-10 w-64">
+                            <TelemetryHUD data={telemetryData[playbackIndex]} />
+                        </div>
+
+                        {/* Playback Controls Bar */}
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 w-[90%] max-w-xl bg-zinc-950/90 backdrop-blur-xl border border-zinc-800 rounded-full p-2 px-6 flex items-center gap-6 shadow-2xl">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsPlaying(!isPlaying)}
+                                className="hover:bg-white/10 rounded-full w-10 h-10 text-white"
+                            >
+                                {isPlaying ? <Pause className="fill-current h-4 w-4" /> : <Play className="fill-current h-4 w-4" />}
+                            </Button>
+
+                            <div className="flex-1 flex flex-col gap-1">
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max={telemetryData.length - 1}
+                                    value={playbackIndex}
+                                    onChange={(e) => {
+                                        setPlaybackIndex(parseInt(e.target.value))
+                                        setIsPlaying(false)
+                                    }}
+                                    className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-red-600 hover:accent-red-500 transition-all"
+                                />
+                            </div>
+
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => { setPlaybackIndex(0); setIsPlaying(false); }}
+                                className="hover:bg-white/10 rounded-full w-8 h-8 text-zinc-400 hover:text-white"
+                            >
+                                <RotateCcw className="h-3 w-3" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Widgets Deck */}
+                    <div className="flex-1 grid grid-cols-2 gap-4 min-h-[200px]">
+                        <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-1 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
+                            <StrategyPredictor />
+                        </div>
+                        <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-1 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
+                            <WeatherRadar />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Telemetry Analysis */}
+                <div className="flex flex-col gap-4 h-full overflow-y-auto pr-1 custom-scrollbar">
+                    {/* Radio & Tyres */}
+                    <div className="grid grid-cols-2 gap-4 h-40 shrink-0">
+                        <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden">
+                            <TeamRadio />
+                        </div>
+                        <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden">
+                            <TyreAnalysis />
+                        </div>
+                    </div>
+
+                    {/* Telemetry Stack */}
+                    <div className="flex-1 flex flex-col gap-4 min-h-0">
+                        <Card className="bg-zinc-900/30 border-zinc-800 flex-1 min-h-[180px] flex flex-col">
+                            <CardHeader className="py-3 px-4 border-b border-zinc-800/50 flex flex-row items-center justify-between">
+                                <CardTitle className="text-xs font-mono uppercase text-zinc-400 flex items-center gap-2">
+                                    <Gauge className="w-4 h-4" /> Speed Trace
+                                </CardTitle>
+                                <span className="text-xs font-mono text-red-500">km/h</span>
+                            </CardHeader>
+                            <CardContent className="p-0 flex-1 relative">
+                                <div className="absolute inset-0">
+                                    <TelemetryChart
+                                        data={telemetryData}
+                                        dataKey="speed"
+                                        color="#ef4444"
+                                        comparisonData={comparisonTelemetryData}
+                                        activeIndex={playbackIndex}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-zinc-900/30 border-zinc-800 flex-1 min-h-[180px] flex flex-col">
+                            <CardHeader className="py-3 px-4 border-b border-zinc-800/50 flex flex-row items-center justify-between">
+                                <CardTitle className="text-xs font-mono uppercase text-zinc-400 flex items-center gap-2">
+                                    <Activity className="w-4 h-4" /> Throttle
+                                </CardTitle>
+                                <span className="text-xs font-mono text-green-500">%</span>
+                            </CardHeader>
+                            <CardContent className="p-0 flex-1 relative">
+                                <div className="absolute inset-0">
+                                    <TelemetryChart
+                                        data={telemetryData}
+                                        dataKey="throttle"
+                                        color="#22c55e"
+                                        comparisonData={comparisonTelemetryData}
+                                        activeIndex={playbackIndex}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-zinc-900/30 border-zinc-800 flex-1 min-h-[180px] flex flex-col">
+                            <CardHeader className="py-3 px-4 border-b border-zinc-800/50 flex flex-row items-center justify-between">
+                                <CardTitle className="text-xs font-mono uppercase text-zinc-400 flex items-center gap-2">
+                                    <Activity className="w-4 h-4" /> Brake
+                                </CardTitle>
+                                <span className="text-xs font-mono text-blue-500">Bar</span>
+                            </CardHeader>
+                            <CardContent className="p-0 flex-1 relative">
+                                <div className="absolute inset-0">
+                                    <TelemetryChart
+                                        data={telemetryData}
+                                        dataKey="brake"
+                                        color="#3b82f6"
+                                        comparisonData={comparisonTelemetryData}
+                                        activeIndex={playbackIndex}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function Badge({ children, className, variant }: { children: React.ReactNode, className?: string, variant?: string }) {
+    return (
+        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className}`}>
+            {children}
+        </span>
+    )
+}
