@@ -55,7 +55,7 @@ export default function SessionPage() {
             }, 50) // 20fps
         }
         return () => clearInterval(interval)
-    }, [isPlaying, telemetryData.length])
+    }, [isPlaying, telemetryData?.length])
 
     useEffect(() => {
         const fetchData = async () => {

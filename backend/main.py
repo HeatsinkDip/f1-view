@@ -161,7 +161,7 @@ def get_telemetry(year: int, location: str, session_type: str, driver: str, limi
                 session.telemetry_loaded = True
                 session.basic_loaded = True # Telemetry implies basic
         
-        driver_laps = session.laps.pick_driver(driver_id)
+        driver_laps = session.laps.pick_driver(driver)
         if driver_laps.empty:
             return {"error": "Driver not found or no laps"}
             
@@ -186,7 +186,7 @@ def get_telemetry(year: int, location: str, session_type: str, driver: str, limi
             })
             
         return {
-            "driver_id": driver_id,
+            "driver_id": driver,
             "lap_time": fastest_lap['LapTime'].total_seconds(),
             "telemetry": data
         }
