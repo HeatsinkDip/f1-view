@@ -180,7 +180,7 @@ def get_telemetry(year: int, location: str, session_type: str, driver: str, limi
                 "rpm": row['RPM'],
                 "gear": row['nGear'],
                 "throttle": row['Throttle'],
-                "brake": row['Brake'],
+                "brake": 100 if row['Brake'] else 0,
                 "x": row['X'],
                 "y": row['Y']
             })
