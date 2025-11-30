@@ -180,7 +180,7 @@ export default function SessionPage() {
             {/* Grid Pattern Overlay */}
             <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] -z-10" />
 
-            <div className="p-4 md:p-6 flex flex-col h-screen">
+            <div className="p-4 md:p-6 flex flex-col min-h-screen">
                 {/* Enhanced Header */}
                 <header className="mb-6 px-2 pb-6 border-b border-zinc-800/50 relative animate-fade-in">
                     {/* Glow Effect */}
@@ -277,7 +277,7 @@ export default function SessionPage() {
                 </header>
 
                 {/* Mission Control Grid - Balanced Layout */}
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-140px)] min-h-[800px]">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
 
                     {/* Left Column: Track Map & Context */}
                     <div className="flex flex-col gap-6">
