@@ -46,7 +46,7 @@ export default function LandingPage() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white flex flex-col relative overflow-hidden font-sans selection:bg-red-600 selection:text-white">
+        <div className="min-h-screen bg-zinc-950 text-white flex flex-col relative overflow-hidden font-sans selection:bg-red-600 selection:text-white" suppressHydrationWarning>
             {/* Background Effects */}
             <div className="fixed inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/20 via-zinc-950 to-black" />
@@ -88,7 +88,7 @@ export default function LandingPage() {
                         Live Telemetry Available
                     </div>
 
-                    <h1 className="text-7xl md:text-9xl font-black tracking-tighter leading-[0.85] drop-shadow-2xl italic uppercase">
+                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.85] drop-shadow-2xl italic uppercase">
                         Race Data <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500 relative">
                             Unleashed
@@ -96,9 +96,8 @@ export default function LandingPage() {
                         </span>
                     </h1>
 
-                    <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-medium">
-                        The ultimate Formula 1 companion. Professional-grade telemetry,
-                        real-time track visualization, and deep performance analytics.
+                    <p className="text-xl md:text-1.5xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-medium">
+                        The ultimate Formula 1 companion. Professional-grade telemetry, real-time track visualization, and deep performance analytics.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
