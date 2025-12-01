@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next.js Boilerplate",
-  description: "A modern Next.js boilerplate with Shadcn UI, Prisma, and Tailwind.",
+  title: "F1 View - Formula 1 Telemetry & Race Analytics",
+  description: "F1 View is a Formula 1 Telemetry & Race Analytics platform.",
 };
 
 export default function RootLayout({
