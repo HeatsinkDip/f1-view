@@ -3,14 +3,54 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Activity, Map, Trophy, Timer, ChevronRight, Play } from "lucide-react"
+import { useEffect, useState } from "react"
+import { getStandings, getSchedule } from "@/lib/api"
 
 export default function LandingPage() {
+    const [standings, setStandings] = useState<any[]>([])
+    const [nextRace, setNextRace] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Standings (try 2025, fallback to 2024 if empty)
+                let standingsData = await getStandings(2025).catch(() => null)
+                if (!standingsData || !standingsData.drivers || standingsData.drivers.length === 0) {
+                    standingsData = await getStandings(2024)
+                }
+                if (standingsData && standingsData.drivers) {
+                    setStandings(standingsData.drivers.slice(0, 3))
+                }
+
+                // Fetch Schedule to find next race
+                const scheduleData = await getSchedule(2025)
+                if (scheduleData && scheduleData.events) {
+                    const now = new Date()
+                    const upcoming = scheduleData.events.find((e: any) => new Date(e.EventDate) > now)
+                    if (upcoming) {
+                        setNextRace(upcoming)
+                    } else {
+                        // Fallback to first race of 2025 or last of 2024 if season over
+                        setNextRace(scheduleData.events[0])
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch landing page data", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [])
+
     return (
         <div className="min-h-screen bg-zinc-950 text-white flex flex-col relative overflow-hidden font-sans selection:bg-red-600 selection:text-white">
             {/* Background Effects */}
             <div className="fixed inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-900/20 via-zinc-950 to-black" />
-                <div className="absolute inset-0 bg-[url('https://media.formula1.com/image/upload/f_auto,c_limit,w_1920,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Sunday/GettyImages-2186767068')] bg-cover bg-center opacity-20 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517672651691-24622a91b550?q=80&w=2832&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay" />
                 <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
             </div>
 
@@ -110,13 +150,13 @@ export default function LandingPage() {
                             category="TECHNICAL"
                             title="The Aerodynamic Evolution of the 2025 Front Wing"
                             date="Nov 29, 2024"
-                            image="https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Friday/GettyImages-2186453068"
+                            image="https://images.unsplash.com/photo-1532906619279-a798156785c7?q=80&w=2574&auto=format&fit=crop"
                         />
                         <NewsCard
                             category="STRATEGY"
                             title="Undercut vs Overcut: Analyzing Tire Degradation at Lusail"
                             date="Nov 28, 2024"
-                            image="https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Friday/GettyImages-2186464733"
+                            image="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=2670&auto=format&fit=crop"
                         />
                     </div>
                 </div>
@@ -127,30 +167,24 @@ export default function LandingPage() {
                         Championship <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">Leaders</span>
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
-                        <DriverCard
-                            name="Max Verstappen"
-                            team="Red Bull Racing"
-                            points={429}
-                            image="https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/2col/image.png"
-                            rank={1}
-                            color="bg-blue-600"
-                        />
-                        <DriverCard
-                            name="Lando Norris"
-                            team="McLaren"
-                            points={349}
-                            image="https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png.transform/2col/image.png"
-                            rank={2}
-                            color="bg-orange-500"
-                        />
-                        <DriverCard
-                            name="Charles Leclerc"
-                            team="Ferrari"
-                            points={341}
-                            image="https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/2col/image.png"
-                            rank={3}
-                            color="bg-red-600"
-                        />
+                        {loading ? (
+                            // Loading Skeletons
+                            [...Array(3)].map((_, i) => (
+                                <div key={i} className="h-[450px] rounded-3xl bg-zinc-900/50 border border-white/5 animate-pulse" />
+                            ))
+                        ) : (
+                            standings.map((driver: any) => (
+                                <DriverCard
+                                    key={driver.pos}
+                                    name={driver.name}
+                                    team={driver.team}
+                                    points={driver.points}
+                                    image={driver.image}
+                                    rank={driver.pos}
+                                    color={driver.pos === 1 ? "bg-blue-600" : driver.pos === 2 ? "bg-orange-500" : "bg-red-600"}
+                                />
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -161,7 +195,7 @@ export default function LandingPage() {
                             <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 group-hover:opacity-40 blur-2xl transition-opacity duration-700" />
                             <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-[4/3] shadow-2xl">
                                 <img
-                                    src="https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Friday/GettyImages-2186464733"
+                                    src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=2670&auto=format&fit=crop"
                                     alt="Technical Analysis"
                                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                                 />
@@ -205,25 +239,31 @@ export default function LandingPage() {
 
                 {/* Circuit Spotlight */}
                 <div className="mt-40 w-full relative h-[700px] flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://media.formula1.com/image/upload/f_auto,c_limit,w_1920,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Thursday/GettyImages-2186156868')] bg-cover bg-center fixed-bg transform scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/80" />
-                    <div className="relative z-10 text-center max-w-5xl px-6">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/20 border border-red-600/50 text-red-500 font-bold uppercase tracking-widest text-sm mb-8 backdrop-blur-md">
-                            <Map className="w-4 h-4" />
-                            Circuit Spotlight
-                        </div>
-                        <h2 className="text-6xl md:text-9xl font-black tracking-tighter text-white mb-8 uppercase italic drop-shadow-2xl">
-                            LUSAIL
-                        </h2>
-                        <p className="text-2xl md:text-3xl text-zinc-200 max-w-3xl mx-auto mb-12 font-medium leading-tight drop-shadow-lg">
-                            Master the high-speed corners of Qatar. Every curb, every millisecond analyzed under the lights.
-                        </p>
-                        <Button asChild size="lg" className="h-20 px-12 text-2xl bg-white text-black hover:bg-zinc-200 rounded-full font-black uppercase tracking-wider shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105">
-                            <Link href="/session/2024/Lusail/Race">
-                                View Track Analysis
-                            </Link>
-                        </Button>
-                    </div>
+                    {nextRace ? (
+                        <>
+                            <div className="absolute inset-0 bg-cover bg-center fixed-bg transform scale-105" style={{ backgroundImage: `url('${nextRace.Image}')` }} />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/80" />
+                            <div className="relative z-10 text-center max-w-5xl px-6">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/20 border border-red-600/50 text-red-500 font-bold uppercase tracking-widest text-sm mb-8 backdrop-blur-md">
+                                    <Map className="w-4 h-4" />
+                                    Circuit Spotlight
+                                </div>
+                                <h2 className="text-6xl md:text-9xl font-black tracking-tighter text-white mb-8 uppercase italic drop-shadow-2xl">
+                                    {nextRace.Location.toUpperCase()}
+                                </h2>
+                                <p className="text-2xl md:text-3xl text-zinc-200 max-w-3xl mx-auto mb-12 font-medium leading-tight drop-shadow-lg">
+                                    {nextRace.OfficialEventName}
+                                </p>
+                                <Button asChild size="lg" className="h-20 px-12 text-2xl bg-white text-black hover:bg-zinc-200 rounded-full font-black uppercase tracking-wider shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all hover:scale-105">
+                                    <Link href={`/session/${new Date().getFullYear()}/${nextRace.Location}/Race`}>
+                                        View Track Analysis
+                                    </Link>
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="text-white">Loading Circuit Data...</div>
+                    )}
                 </div>
 
                 {/* Season Highlights */}
@@ -245,7 +285,7 @@ export default function LandingPage() {
                                 </Button>
                             </div>
                             <div className="flex-1 w-full aspect-video bg-zinc-950 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden group cursor-pointer shadow-2xl">
-                                <div className="absolute inset-0 bg-[url('https://media.formula1.com/image/upload/f_auto,c_limit,w_960,q_auto/f_auto/q_auto/content/dam/fom-website/manual/Misc/2024manual/2024Races/Qatar/Sunday/GettyImages-2186767068')] bg-cover bg-center opacity-60 group-hover:scale-105 transition-transform duration-700" />
+                                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517672651691-24622a91b550?q=80&w=2832&auto=format&fit=crop')] bg-cover bg-center opacity-60 group-hover:scale-105 transition-transform duration-700" />
                                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
                                 <div className="relative z-10 w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                                     <Play className="w-8 h-8 text-white fill-white ml-1" />
@@ -322,9 +362,11 @@ function NewsCard({ category, title, date, image }: { category: string, title: s
 function DriverCard({ name, team, points, image, rank, color }: { name: string, team: string, points: number, image: string, rank: number, color: string }) {
     return (
         <div className="relative group hover:-translate-y-2 transition-transform duration-500">
-            <div className={`absolute inset-0 bg-gradient-to-b ${color.replace('bg-', 'from-')} to-black/90 z-10 rounded-3xl opacity-80`} />
+            {/* Reduced opacity from 80 to 40 for less intense coloring */}
+            <div className={`absolute inset-0 bg-gradient-to-b ${color.replace('bg-', 'from-')} to-black/90 z-10 rounded-3xl opacity-40 group-hover:opacity-30 transition-opacity duration-500`} />
             <div className="relative h-[450px] rounded-3xl overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl">
-                <img src={image} alt={name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 pt-8" />
+                {/* Increased scale from 105 to 110 for more visible hover effect */}
+                <img src={image} alt={name} className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 pt-8" />
 
                 <div className="absolute top-4 left-4 z-20">
                     <div className="w-12 h-12 rounded-xl bg-white text-black font-black flex items-center justify-center text-2xl shadow-lg transform -rotate-3 group-hover:rotate-0 transition-transform">

@@ -354,7 +354,7 @@ export default function SessionPage() {
                     {/* Right Column: Telemetry Analysis */}
                     <div className="flex flex-col gap-4 h-full overflow-y-auto pr-1 custom-scrollbar">
                         {/* Radio & Tyres */}
-                        <div className="grid grid-cols-2 gap-4 h-40 shrink-0">
+                        <div className="grid grid-cols-2 gap-4 h-72 shrink-0">
                             <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden">
                                 <TeamRadio />
                             </div>
@@ -410,14 +410,15 @@ export default function SessionPage() {
                                     <CardTitle className="text-xs font-mono uppercase text-zinc-400 flex items-center gap-2">
                                         <Activity className="w-4 h-4" /> Brake
                                     </CardTitle>
-                                    <span className="text-xs font-mono text-blue-500">Bar</span>
+                                    <span className="text-xs font-mono text-red-500">%</span>
                                 </CardHeader>
                                 <CardContent className="p-0 flex-1 relative">
                                     <div className="absolute inset-0">
                                         <TelemetryChart
                                             data={telemetryData}
                                             dataKey="brake"
-                                            color="#3b82f6"
+                                            color="#ef4444"
+                                            unit="%"
                                             comparisonData={comparisonTelemetryData}
                                             activeIndex={playbackIndex}
                                         />

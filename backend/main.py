@@ -14,6 +14,47 @@ if not os.path.exists(CACHE_DIR):
 
 fastf1.Cache.enable_cache(CACHE_DIR)
 
+# Image Mappings
+DRIVER_IMAGES = {
+    "Max Verstappen": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/2col/image.png",
+    "Lando Norris": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png.transform/2col/image.png",
+    "Charles Leclerc": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/2col/image.png",
+    "Oscar Piastri": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png.transform/2col/image.png",
+    "Carlos Sainz": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/2col/image.png",
+    "George Russell": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png.transform/2col/image.png",
+    "Lewis Hamilton": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/2col/image.png",
+    "Sergio Perez": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01.png.transform/2col/image.png",
+    "Fernando Alonso": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01.png.transform/2col/image.png",
+    "Nico Hulkenberg": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/N/NICHUL01_Nico_Hulkenberg/nichul01.png.transform/2col/image.png",
+}
+
+CIRCUIT_IMAGES = {
+    "Lusail": "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2670&auto=format&fit=crop",
+    "Yas Marina": "https://images.unsplash.com/photo-1517672651691-24622a91b550?q=80&w=2832&auto=format&fit=crop",
+    "Sakhir": "https://images.unsplash.com/photo-1532906619279-a798156785c7?q=80&w=2574&auto=format&fit=crop",
+    "Jeddah": "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=2670&auto=format&fit=crop",
+    "Albert Park": "https://images.unsplash.com/photo-1580234550905-408e19d56482?q=80&w=2670&auto=format&fit=crop",
+    "Suzuka": "https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?q=80&w=2670&auto=format&fit=crop",
+    "Shanghai": "https://images.unsplash.com/photo-1535132011086-b8818f016104?q=80&w=2670&auto=format&fit=crop",
+    "Miami": "https://images.unsplash.com/photo-1551524164-687a55dd1126?q=80&w=2525&auto=format&fit=crop",
+    "Imola": "https://images.unsplash.com/photo-1621932953986-15fcf084da0f?q=80&w=2670&auto=format&fit=crop",
+    "Monaco": "https://images.unsplash.com/photo-1516335096713-6652e9283c3e?q=80&w=2667&auto=format&fit=crop",
+    "Montreal": "https://images.unsplash.com/photo-1573074617613-fc8443628f34?q=80&w=2670&auto=format&fit=crop",
+    "Barcelona": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2670&auto=format&fit=crop",
+    "Spielberg": "https://images.unsplash.com/photo-1595752393674-84c25925c40e?q=80&w=2670&auto=format&fit=crop",
+    "Silverstone": "https://images.unsplash.com/photo-1519245659620-e859806a8d3b?q=80&w=2670&auto=format&fit=crop",
+    "Budapest": "https://images.unsplash.com/photo-1532509854626-54754227793f?q=80&w=2670&auto=format&fit=crop",
+    "Spa": "https://images.unsplash.com/photo-1596566427382-7d0434934e6d?q=80&w=2670&auto=format&fit=crop",
+    "Zandvoort": "https://images.unsplash.com/photo-1629213506425-4c65e8c9d242?q=80&w=2670&auto=format&fit=crop",
+    "Monza": "https://images.unsplash.com/photo-1596727147705-54a7d7501d7d?q=80&w=2670&auto=format&fit=crop",
+    "Baku": "https://images.unsplash.com/photo-1575010726601-576a8a553e5d?q=80&w=2670&auto=format&fit=crop",
+    "Singapore": "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2670&auto=format&fit=crop",
+    "Austin": "https://images.unsplash.com/photo-1580234550905-408e19d56482?q=80&w=2670&auto=format&fit=crop",
+    "Mexico City": "https://images.unsplash.com/photo-1584646098378-0874589d76b1?q=80&w=2670&auto=format&fit=crop",
+    "Sao Paulo": "https://images.unsplash.com/photo-1505528638255-fd05908162dc?q=80&w=2670&auto=format&fit=crop",
+    "Las Vegas": "https://images.unsplash.com/photo-1605836011078-71368d1638b6?q=80&w=2670&auto=format&fit=crop",
+}
+
 app = FastAPI(title="F1 View API", version="1.0.0")
 
 # Configure CORS
@@ -72,6 +113,19 @@ def get_schedule(year: int):
         # Filter for columns that actually exist (handling older seasons vs new)
         existing_columns = [col for col in columns if col in schedule.columns]
         data = schedule[existing_columns].to_dict(orient='records')
+        
+        # Add images
+        for event in data:
+            location = event.get('Location', '')
+            # Fuzzy match or direct match
+            image = CIRCUIT_IMAGES.get(location, "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2670&auto=format&fit=crop")
+            # Try to find partial match if direct match fails
+            if location and location not in CIRCUIT_IMAGES:
+                for key, url in CIRCUIT_IMAGES.items():
+                    if key in location:
+                        image = url
+                        break
+            event['Image'] = image
         
         return {"year": year, "events": data}
     except Exception as e:
@@ -409,7 +463,8 @@ def get_standings(year: int):
                         "name": f"{row['givenName']} {row['familyName']}",
                         "team": team_name, 
                         "points": float(row['points']),
-                        "wins": int(row['wins'])
+                        "wins": int(row['wins']),
+                        "image": DRIVER_IMAGES.get(f"{row['givenName']} {row['familyName']}", "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/2col/image.png")
                     })
         except Exception as e:
             print(f"Error fetching driver standings: {e}")
