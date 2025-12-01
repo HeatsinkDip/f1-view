@@ -88,7 +88,7 @@ export default function LandingPage() {
                         Live Telemetry Available
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.85] drop-shadow-2xl italic uppercase">
+                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] drop-shadow-2xl italic uppercase">
                         Race Data <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500 relative">
                             Unleashed
