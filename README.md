@@ -1,188 +1,131 @@
-# F1 View 🏎️
+# F1 View - Formula 1 Telemetry & Race Analytics
 
-A premium Formula 1 data visualization and telemetry analysis platform built with Next.js and FastAPI.
+<div align="center">
 
-![F1 View](https://img.shields.io/badge/F1-View-dc2626?style=for-the-badge&logo=formula1)
-![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
-![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=for-the-badge&logo=fastapi)
+![F1 View Banner](public/images/1.png)
 
-## ✨ Features
+### F1 View is a professional-grade telemetry and analytics platform designed for Formula 1 enthusiasts and data analysts. It provides real-time track visualization, driver performance comparisons, and deep dives into race strategy, offering an immersive "paddock" experience directly in the browser.
 
-- **Live Race Data**: Real-time F1 schedule, standings, and race information for the 2025 season
-- **Telemetry Analysis**: Interactive track maps with speed heatmaps and driver comparisons
-- **Mission Control Dashboard**: Premium dark-mode interface with F1 broadcast aesthetics
-- **Smart Session Detection**: Automatically displays the latest available data (Qualifying/Race)
-- **Countdown Timer**: Accurate race start countdown using actual session times
-- **Circuit Guide**: Interactive track maps with sector analysis and DRS zones
-- **Advanced Widgets**: Strategy predictor, weather radar, tyre analysis, team radio, and more
+[![F1 View](https://img.shields.io/badge/F1-View-dc2626?style=for-the-badge&logo=formula1)](https://f1-view.vercel.app/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
-## 🚀 Quick Start
+[🚀 Live Demo](https://f1-view.vercel.app/) · [🐞 Report Bug](https://github.com/dipayon-dip/f1-view/issues) · [✨ Request Feature](https://github.com/dipayon-dip/f1-view/issues)
 
-### Prerequisites
-
-- Node.js 18+
-- Python 3.9+
-- npm or yarn
-
-### Local Development
-
-1. **Clone the repository**
-```bash
-git clone <your-repo-url>
-cd f1-view
-```
-
-2. **Install frontend dependencies**
-```bash
-npm install
-```
-
-3. **Install backend dependencies**
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-4. **Start the backend**
-```bash
-# From the backend directory
-fastapi dev main.py --host 0.0.0.0 --port 8001
-```
-
-5. **Start the frontend**
-```bash
-# From the root directory
-npm run dev
-```
-
-6. **Open your browser**
-```
-http://localhost:3000
-```
-
-## 📦 Deployment
-
-### Quick Deploy Options
-
-#### Option 1: Vercel + Railway (Recommended)
-- **Frontend**: Deploy to [Vercel](https://vercel.com) with one click
-- **Backend**: Deploy to [Railway](https://railway.app) or [Render](https://render.com)
-- See [DEPLOY.md](./DEPLOY.md) for detailed instructions
-
-#### Option 2: Docker
-```bash
-docker-compose up -d
-```
-See [DOCKER.md](./DOCKER.md) for container deployment
-
-### Environment Variables
-
-**Frontend (.env.local)**
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8001
-```
-
-**Backend (.env)**
-```env
-PORT=8001
-ALLOWED_ORIGINS=http://localhost:3000
-FASTF1_CACHE_DIR=/tmp/fastf1_cache
-```
-
-## 🏗️ Tech Stack
-
-### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **Styling**: Tailwind CSS v4
-- **UI Components**: shadcn/ui
-- **Charts**: Recharts
-- **Icons**: Lucide React
-
-### Backend
-- **Framework**: FastAPI
-- **Data Source**: FastF1 (Official F1 telemetry library)
-- **Caching**: In-memory session cache
-- **CORS**: Configured for cross-origin requests
-
-## 📖 Documentation
-
-- [Deployment Guide](./DEPLOY.md) - Complete deployment instructions
-- [Docker Guide](./DOCKER.md) - Containerized deployment
-- [API Documentation](http://localhost:8001/docs) - Interactive API docs (when backend is running)
-
-## 🎨 Features Breakdown
-
-### Dashboard
-- Next race countdown with accurate timing
-- Latest race results and highlights
-- Driver standings and constructor standings
-- Circuit guide with interactive track map
-- Rivalry watch and driver comparisons
-
-### Session Analysis
-- Full telemetry replay with playback controls
-- Speed, throttle, and brake traces
-- Driver vs driver comparisons
-- Strategy predictor and weather radar
-- Team radio highlights
-- Tyre degradation analysis
-
-### Smart Data Handling
-- Automatically falls back to Qualifying data when Race hasn't started
-- Handles future sessions gracefully with "Session Upcoming" screen
-- Efficient caching to minimize API calls
-
-## 🔧 Development
-
-### Project Structure
-```
-f1-view/
-├── src/
-│   ├── app/              # Next.js pages
-│   ├── components/       # React components
-│   └── lib/              # Utilities and API client
-├── backend/
-│   └── main.py           # FastAPI server
-├── public/               # Static assets
-└── docker-compose.yml    # Docker configuration
-```
-
-### Key Commands
-
-```bash
-# Frontend
-npm run dev          # Development server
-npm run build        # Production build
-npm run start        # Production server
-
-# Backend
-fastapi dev main.py  # Development server
-uvicorn main:app     # Production server
-```
-
-## 🐛 Known Issues
-
-- FastF1 data availability depends on official F1 timing data
-- First load may be slow while caching session data
-- Some historical races may have incomplete telemetry
-
-## 📝 License
-
-This project is for educational and personal use. F1 data is provided by FastF1 and is subject to Formula 1's terms of use.
-
-## 🙏 Acknowledgments
-
-- [FastF1](https://github.com/theOehrly/Fast-F1) - F1 telemetry data library
-- [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
-- Formula 1 - For the amazing sport
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests.
+</div>
 
 ---
 
-Built with ❤️ for F1 fans by F1 fans
-# Deployment: Mon Dec  1 00:26:54 +06 2025
+## 🏎️ About The Project
+
+F1 View bridges the gap between broadcast visuals and raw engineering data. Built for speed and precision, the application processes complex telemetry data to render interactive track maps, sector analyses, and live championship standings.
+
+Whether you are analyzing tire degradation curves, comparing throttle traces between drivers, or just tracking the live standings, F1 View provides the insights that power champions.
+
+### Key Features
+
+*   **📊 Live Telemetry**: Real-time visualization of speed, throttle, brake, and RPM data with ultra-low latency.
+*   **🗺️ Interactive Track Dominance**: Dynamic track maps featuring sector-by-sector analysis and driver comparison overlays.
+*   **🏆 Championship Tracker**: Live standings, constructor battles, and historical points analysis.
+*   **⚡ Performance Analytics**: Deep dive tools for analyzing tire degradation, fuel load effects, and aerodynamic efficiency.
+*   **📰 Technical Insights**: Integrated news feed covering technical developments and strategic breakdowns (e.g., Undercuts vs. Overcuts).
+*   **⏯️ Session Replays**: Relive specific race moments with advanced replay tools.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Framework**: Next.js (React)
+*   **Styling**: Tailwind CSS
+*   **Deployment**: Vercel
+*   **Data**: Integration with F1 Telemetry APIs (OpenF1/FastF1)
+*   **Visualization**: Interactive charts and mapping libraries
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to set up the project locally.
+
+### Prerequisites
+
+*   **Node.js** (v18 or higher)
+*   **Python** (v3.9 or higher)
+*   **npm** or **yarn**
+
+### Installation
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/dipayon-dip/f1-view.git
+    cd f1-view
+    ```
+
+2.  **Install Frontend Dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Setup Backend**
+    ```bash
+    cd backend
+    python -m venv .venv
+    source .venv/bin/activate  # Windows: .venv\Scripts\activate
+    pip install -r requirements.txt
+    ```
+
+4.  **Start Development Servers**
+
+    *   **Backend** (Terminal 1):
+        ```bash
+        fastapi dev main.py --host 0.0.0.0 --port 8001
+        ```
+
+    *   **Frontend** (Terminal 2):
+        ```bash
+        npm run dev
+        ```
+
+5.  **Access the App**
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📦 Deployment
+
+### Docker (Recommended)
+
+For a production-ready deployment using Docker:
+
+```bash
+docker-compose up -d --build
+```
+
+The application will be available at `http://localhost:3000`.
+
+---
+
+## 👥 Authors
+
+*   **Dip Kundu** - *Lead Developer* - [GitHub](https://github.com/dipayon-dip)
+*   **Md Jahidul Hossain Mekat** - *Co-Developer* - [GitHub](https://github.com/Phanthom-Mekat)
+
+---
+
+## � License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 🙏 Acknowledgments
+
+*   [FastF1](https://github.com/theOehrly/Fast-F1) for the incredible open-source telemetry library.
+*   [Formula 1](https://www.formula1.com/) for the sport we love.
+*   [Vercel](https://vercel.com/) for hosting the frontend.
+
+---
+
+<div align="center">
+  <p>Built with Love for the F1 Community</p>
+</div>
