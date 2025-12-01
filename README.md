@@ -109,8 +109,8 @@ The application will be available at `http://localhost:3000`.
 
 ## 👥 Authors
 
-*   **Dip Kundu** - *Lead Developer* - [GitHub](https://github.com/dipayon-dip)
-*   **Md Jahidul Hossain Mekat** - *Co-Developer* - [GitHub](https://github.com/Phanthom-Mekat)
+*   **Dip Kundu** - *Developer* - [GitHub](https://github.com/dipayon-dip)
+*   **Md Jahidul Hossain Mekat** - *Developer* - [GitHub](https://github.com/Phanthom-Mekat)
 
 ---
 
@@ -125,6 +125,13 @@ Distributed under the MIT License. See `LICENSE` for more information.
 *   [Vercel](https://vercel.com/) for hosting the frontend.
 
 ---
+
+## 📄 Disclaimer
+
+F1 View is an unofficial project and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V.
+
+---
+
 
 <div align="center">
   <p>Built with Love for the F1 Community</p>
