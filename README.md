@@ -109,7 +109,7 @@ The application will be available at `http://localhost:3000`.
 
 ## 👥 Authors
 
-*   **Dip Kundu** - *Developer* - [GitHub](https://github.com/dipayon-dip)
+*   **Dip Kundu** - *Developer* - [GitHub](https://github.com/HeatsinkDip)
 *   **Md Jahidul Hossain Mekat** - *Developer* - [GitHub](https://github.com/Phanthom-Mekat)
 
 ---
