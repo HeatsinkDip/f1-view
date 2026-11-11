@@ -3,23 +3,22 @@ import { DashboardClient } from "@/components/dashboard-client";
 import { JsonLd } from "@/components/json-ld";
 import { selectRaceScheduleContext } from "@/lib/schedule";
 import { getServerSchedule, getServerSessionDrivers } from "@/lib/server-api";
-import { SITE_URL } from "@/lib/site";
+import { buildPageSocialMetadata, SITE_URL } from "@/lib/site";
 
 export const revalidate = 900;
 
+const DASHBOARD_TITLE = "Live Season Dashboard & Race Telemetry Hub";
+const DASHBOARD_DESCRIPTION =
+  "Full Formula 1 season schedule, driver standings, weather radar, tyre stint strategy, lap comparison, and race control feed powered by FastF1 and OpenF1.";
+
 export const metadata: Metadata = {
-  title: "Live Season Dashboard & Race Telemetry Hub",
-  description:
-    "Full Formula 1 season schedule, driver standings, weather radar, tyre stint strategy, lap comparison, and race control feed powered by FastF1 and OpenF1.",
-  alternates: {
-    canonical: "/dashboard",
-  },
-  openGraph: {
-    url: `${SITE_URL}/dashboard`,
-    title: "Live Season Dashboard & Race Telemetry Hub | F1 View",
-    description:
-      "Full Formula 1 season schedule, driver standings, weather radar, tyre stint strategy, lap comparison, and race control feed.",
-  },
+  title: DASHBOARD_TITLE,
+  description: DASHBOARD_DESCRIPTION,
+  ...buildPageSocialMetadata({
+    title: DASHBOARD_TITLE,
+    description: DASHBOARD_DESCRIPTION,
+    path: "/dashboard",
+  }),
 };
 
 export default async function DashboardPage() {

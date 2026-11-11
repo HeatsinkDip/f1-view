@@ -2,13 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { buildPageSocialMetadata } from "@/lib/site";
+
+const PRIVACY_TITLE = "Privacy Policy";
+const PRIVACY_DESCRIPTION =
+  "How F1 View handles telemetry requests, local theme preferences, and optional FastF1 session authentication.";
+
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description:
-    "How F1 View handles telemetry requests, local theme preferences, and optional FastF1 session authentication.",
-  alternates: {
-    canonical: "/privacy",
-  },
+  title: PRIVACY_TITLE,
+  description: PRIVACY_DESCRIPTION,
+  ...buildPageSocialMetadata({
+    title: PRIVACY_TITLE,
+    description: PRIVACY_DESCRIPTION,
+    path: "/privacy",
+  }),
 };
 
 export default function PrivacyPage() {

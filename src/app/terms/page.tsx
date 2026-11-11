@@ -2,13 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { buildPageSocialMetadata } from "@/lib/site";
+
+const TERMS_TITLE = "Terms & Disclaimer";
+const TERMS_DESCRIPTION =
+  "Terms of use, open-source MIT license summary, and unofficial Formula 1 trademark disclaimer for F1 View.";
+
 export const metadata: Metadata = {
-  title: "Terms & Disclaimer",
-  description:
-    "Terms of use, open-source MIT license summary, and unofficial Formula 1 trademark disclaimer for F1 View.",
-  alternates: {
-    canonical: "/terms",
-  },
+  title: TERMS_TITLE,
+  description: TERMS_DESCRIPTION,
+  ...buildPageSocialMetadata({
+    title: TERMS_TITLE,
+    description: TERMS_DESCRIPTION,
+    path: "/terms",
+  }),
 };
 
 export default function TermsPage() {

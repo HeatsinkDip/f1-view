@@ -6,7 +6,7 @@ import {
     getServerSessionDrivers,
     getServerTrackData,
 } from "@/lib/server-api";
-import { SITE_URL } from "@/lib/site";
+import { buildPageSocialMetadata, SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -57,14 +57,11 @@ function decodeSegment(raw: string): string {
         return {
             title,
             description,
-            alternates: {
-                canonical: canonicalPath,
-            },
-            openGraph: {
-                url: `${SITE_URL}${canonicalPath}`,
-                title: `${title} | F1 View`,
+            ...buildPageSocialMetadata({
+                title,
                 description,
-            },
+                path: canonicalPath,
+            }),
         };
     }
 
