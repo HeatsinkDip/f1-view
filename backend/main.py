@@ -183,24 +183,31 @@ def _require_local_or_admin_auth(request: Request) -> None:
     )
 
 
-# Configure CORS
-allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
-allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
-if allowed_origins_env:
-    for origin in allowed_origins_env.split(","):
-        cleaned = origin.strip()
-        if cleaned and cleaned != "*" and cleaned not in allowed_origins:
-            allowed_origins.append(cleaned)
+def _build_allowed_origins() -> list[str]:
+    """Build normalized CORS allowlist with local dev and production Vercel origins."""
+    origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://f1-view.vercel.app",
+    ]
+    raw_sources = [
+        os.environ.get("ALLOWED_ORIGINS", ""),
+        os.environ.get("FRONTEND_URL", ""),
+    ]
+    for source in raw_sources:
+        for entry in source.split(","):
+            cleaned = entry.strip().rstrip("/")
+            if (
+                cleaned
+                and cleaned != "*"
+                and (cleaned.startswith("https://") or cleaned.startswith("http://"))
+                and cleaned not in origins
+            ):
+                origins.append(cleaned)
+    return origins
+
 
 app.router.dependencies.append(Depends(_validate_common_path_params))
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
-)
 
 
 @app.middleware("http")
@@ -210,6 +217,20 @@ async def add_process_time_header(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = f"{process_time:.4f}"
     return response
+
+
+allowed_origins = _build_allowed_origins()
+allowed_origin_regex = os.environ.get("ALLOWED_ORIGIN_REGEX", "").strip() or None
+
+# Register CORSMiddleware last so it is outermost and attaches CORS headers on all responses.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_origin_regex=allowed_origin_regex,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 
 
 # Per-session cache & locks
