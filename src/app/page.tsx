@@ -45,7 +45,7 @@ export default function LandingPage() {
                     }
                 }
             } catch (error) {
-                console.error("Failed to fetch landing page data", error)
+                console.error("Sorry! This website is under maintenance", error)
             } finally {
                 setLoading(false)
             }

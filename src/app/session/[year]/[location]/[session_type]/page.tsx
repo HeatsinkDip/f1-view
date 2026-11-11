@@ -76,7 +76,7 @@ export default function SessionPage() {
             getDriverTelemetry(year, rawLocation, sessionType, comparisonDriver!)
                 .then((d) => d.telemetry || [])
                 .catch((err) => {
-                    console.error("Failed to load comparison telemetry", err)
+                    console.error("Sorry! This website is under maintenance. Please visit later.", err)
                     return []
                 }),
         EMPTY_TELEMETRY_POINTS
