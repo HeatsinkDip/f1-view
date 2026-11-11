@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Layers, Zap } from "lucide-react"
 import { getTrackData, getCircuitInfo, TrackPoint, CircuitInfoResponse } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 import { Toggle } from "@/components/ui/toggle"
 
 interface CircuitGuideProps {
@@ -12,35 +13,34 @@ interface CircuitGuideProps {
     sessionType?: string
 }
 
+const EMPTY_CIRCUIT: { trackData: TrackPoint[]; circuitInfo: CircuitInfoResponse | null } = {
+    trackData: [],
+    circuitInfo: null,
+}
+
 export function CircuitGuide({
     year = new Date().getFullYear(),
     location = "Lusail",
     sessionType = "Race",
 }: CircuitGuideProps) {
-    const [trackData, setTrackData] = useState<TrackPoint[]>([])
-    const [circuitInfo, setCircuitInfo] = useState<CircuitInfoResponse | null>(null)
-    const [loading, setLoading] = useState(true)
+    const { data, loading } = useAsyncData(
+        `circuit:${year}:${location}:${sessionType}`,
+        async () => {
+            const [track, info] = await Promise.all([
+                getTrackData(year, location, sessionType).catch(() => ({ circuit_name: location, track_data: [] })),
+                getCircuitInfo(year, location, sessionType).catch(() => null),
+            ])
+            return {
+                trackData: track.track_data || [],
+                circuitInfo: info,
+            }
+        },
+        EMPTY_CIRCUIT
+    )
+    const { trackData, circuitInfo } = data
 
     const [showSectors, setShowSectors] = useState(false)
     const [showDRS, setShowDRS] = useState(true)
-
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        Promise.all([
-            getTrackData(year, location, sessionType).catch(() => ({ circuit_name: location, track_data: [] })),
-            getCircuitInfo(year, location, sessionType).catch(() => null),
-        ])
-            .then(([track, info]) => {
-                if (!active) return
-                setTrackData(track.track_data || [])
-                setCircuitInfo(info)
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year, location, sessionType])
 
     if (loading) {
         return (

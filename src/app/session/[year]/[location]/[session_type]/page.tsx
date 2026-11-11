@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Play, Pause, RotateCcw, Activity, Gauge } from "lucide-react"
 import { getSessionDetails, getSessionDrivers, getDriverTelemetry, getTrackData, SessionDetails, Driver, TelemetryPoint, TrackPoint } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -18,136 +19,92 @@ import { TyreAnalysis } from "@/components/tyre-analysis"
 import { F1Loader } from "@/components/f1-loader"
 import { ModeToggle } from "@/components/mode-toggle"
 
+const EMPTY_SESSION_BUNDLE: {
+    session: SessionDetails | null
+    drivers: Driver[]
+    trackData: TrackPoint[]
+} = { session: null, drivers: [], trackData: [] }
+
+const EMPTY_TELEMETRY_POINTS: TelemetryPoint[] = []
+
 export default function SessionPage() {
     const params = useParams()
     const router = useRouter()
     const year = parseInt(params.year as string, 10)
     const rawLocation = decodeURIComponent((params.location as string) || "")
     const sessionType = decodeURIComponent((params.session_type as string) || "Race")
+    const validParams = !Number.isNaN(year) && Boolean(rawLocation)
+    const sessionKey = validParams ? `${year}:${rawLocation}:${sessionType}` : null
 
-    const [session, setSession] = useState<SessionDetails | null>(null)
-    const [drivers, setDrivers] = useState<Driver[]>([])
-    const [trackData, setTrackData] = useState<TrackPoint[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const { data: sessionBundle, loading: bundleLoading, error: bundleError } = useAsyncData(
+        sessionKey,
+        async () => {
+            const [sessionData, driversData, track] = await Promise.all([
+                getSessionDetails(year, rawLocation, sessionType),
+                getSessionDrivers(year, rawLocation, sessionType),
+                getTrackData(year, rawLocation, sessionType).catch(() => ({ circuit_name: rawLocation, track_data: [] })),
+            ])
+            return {
+                session: sessionData,
+                drivers: driversData,
+                trackData: track.track_data || [],
+            }
+        },
+        EMPTY_SESSION_BUNDLE
+    )
+    const { session, drivers, trackData } = sessionBundle
+    const loading = validParams && bundleLoading
+    const error = !validParams ? "Invalid session parameters" : bundleError
 
-    const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
-    const [telemetryData, setTelemetryData] = useState<TelemetryPoint[]>([])
-    const [telemetryLoading, setTelemetryLoading] = useState(false)
-    const [telemetryError, setTelemetryError] = useState<string | null>(null)
+    const [driverPick, setDriverPick] = useState<{ key: string; id: string } | null>(null)
+    const selectedDriver = (driverPick && driverPick.key === sessionKey ? driverPick.id : drivers[0]?.id) || null
 
-    const [comparisonDriver, setComparisonDriver] = useState<string | null>(null)
-    const [comparisonTelemetryData, setComparisonTelemetryData] = useState<TelemetryPoint[]>([])
+    const [comparisonPick, setComparisonPick] = useState<{ key: string; id: string | null } | null>(null)
+    const comparisonDriver = comparisonPick && comparisonPick.key === sessionKey ? comparisonPick.id : null
+
+    const telemetryKey = sessionKey && selectedDriver ? `${sessionKey}:driver:${selectedDriver}` : null
+    const { data: telemetryData, loading: telemetryLoading, error: telemetryError } = useAsyncData(
+        telemetryKey,
+        () => getDriverTelemetry(year, rawLocation, sessionType, selectedDriver!).then((d) => d.telemetry || []),
+        EMPTY_TELEMETRY_POINTS
+    )
+
+    const comparisonKey = sessionKey && comparisonDriver ? `${sessionKey}:comp:${comparisonDriver}` : null
+    const { data: comparisonTelemetryData } = useAsyncData(
+        comparisonKey,
+        () =>
+            getDriverTelemetry(year, rawLocation, sessionType, comparisonDriver!)
+                .then((d) => d.telemetry || [])
+                .catch((err) => {
+                    console.error("Failed to load comparison telemetry", err)
+                    return []
+                }),
+        EMPTY_TELEMETRY_POINTS
+    )
 
     // Animation State
-    const [playbackIndex, setPlaybackIndex] = useState(0)
-    const [isPlaying, setIsPlaying] = useState(false)
+    const activeTelemetryKey = telemetryKey || ""
+    const [playback, setPlayback] = useState<{ key: string; index: number; playing: boolean }>({
+        key: "",
+        index: 0,
+        playing: false,
+    })
+    const playbackIndex = playback.key === activeTelemetryKey ? playback.index : 0
+    const isPlaying = playback.key === activeTelemetryKey ? playback.playing : false
 
     useEffect(() => {
-        let interval: NodeJS.Timeout
-        if (isPlaying && telemetryData.length > 0) {
-            interval = setInterval(() => {
-                setPlaybackIndex(prev => {
-                    if (prev >= telemetryData.length - 1) {
-                        setIsPlaying(false)
-                        return prev
-                    }
-                    return prev + 1
-                })
-            }, 50)
-        }
-        return () => clearInterval(interval)
-    }, [isPlaying, telemetryData.length])
-
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        setError(null)
-        setSelectedDriver(null)
-        setComparisonDriver(null)
-        setTelemetryData([])
-        setComparisonTelemetryData([])
-        setPlaybackIndex(0)
-        setIsPlaying(false)
-
-        const fetchData = async () => {
-            try {
-                const [sessionData, driversData, track] = await Promise.all([
-                    getSessionDetails(year, rawLocation, sessionType),
-                    getSessionDrivers(year, rawLocation, sessionType),
-                    getTrackData(year, rawLocation, sessionType).catch(() => ({ circuit_name: rawLocation, track_data: [] }))
-                ])
-                if (!active) return
-                setSession(sessionData)
-                setDrivers(driversData)
-                setTrackData(track.track_data || [])
-                if (driversData.length > 0) {
-                    setSelectedDriver(driversData[0].id)
+        if (!isPlaying || telemetryData.length === 0) return
+        const interval = setInterval(() => {
+            setPlayback((prev) => {
+                const cur = prev.key === activeTelemetryKey ? prev.index : 0
+                if (cur >= telemetryData.length - 1) {
+                    return { key: activeTelemetryKey, index: cur, playing: false }
                 }
-            } catch (err: unknown) {
-                if (!active) return
-                setError(err instanceof Error ? err.message : "Failed to load session")
-            } finally {
-                if (active) setLoading(false)
-            }
-        }
-
-        if (!Number.isNaN(year) && rawLocation) {
-            fetchData()
-        } else {
-            setError("Invalid session parameters")
-            setLoading(false)
-        }
-
-        return () => { active = false }
-    }, [year, rawLocation, sessionType])
-
-    useEffect(() => {
-        if (!selectedDriver) return
-        let active = true
-        setPlaybackIndex(0)
-        setIsPlaying(false)
-        setTelemetryError(null)
-
-        const fetchTelemetry = async () => {
-            setTelemetryLoading(true)
-            try {
-                const data = await getDriverTelemetry(year, rawLocation, sessionType, selectedDriver)
-                if (!active) return
-                setTelemetryData(data.telemetry || [])
-            } catch (err: unknown) {
-                if (!active) return
-                setTelemetryData([])
-                setTelemetryError(err instanceof Error ? err.message : "Failed to load telemetry")
-            } finally {
-                if (active) setTelemetryLoading(false)
-            }
-        }
-
-        fetchTelemetry()
-        return () => { active = false }
-    }, [selectedDriver, year, rawLocation, sessionType])
-
-    useEffect(() => {
-        if (!comparisonDriver) {
-            setComparisonTelemetryData([])
-            return
-        }
-        let active = true
-
-        const fetchComparisonTelemetry = async () => {
-            try {
-                const data = await getDriverTelemetry(year, rawLocation, sessionType, comparisonDriver)
-                if (active) setComparisonTelemetryData(data.telemetry || [])
-            } catch (err) {
-                console.error("Failed to load comparison telemetry", err)
-                if (active) setComparisonTelemetryData([])
-            }
-        }
-
-        fetchComparisonTelemetry()
-        return () => { active = false }
-    }, [comparisonDriver, year, rawLocation, sessionType])
+                return { key: activeTelemetryKey, index: cur + 1, playing: true }
+            })
+        }, 50)
+        return () => clearInterval(interval)
+    }, [isPlaying, telemetryData.length, activeTelemetryKey])
 
     if (loading) {
         return (
@@ -284,7 +241,7 @@ export default function SessionPage() {
                         {/* Right: Driver Selection */}
                         <div className="flex flex-wrap items-center gap-3">
                             <div className="flex items-center gap-2 bg-card/90 p-2 rounded-xl border border-border backdrop-blur-md shadow-md dark:shadow-xl">
-                                <Select value={selectedDriver || ""} onValueChange={setSelectedDriver}>
+                                <Select value={selectedDriver || ""} onValueChange={(id) => setDriverPick({ key: sessionKey || "", id })}>
                                     <SelectTrigger className="w-[200px] bg-transparent border-none text-foreground focus:ring-0 h-10 font-bold hover:bg-accent transition-colors">
                                         <div className="flex items-center gap-2">
                                             <Activity className="w-4 h-4 text-red-600 dark:text-red-500" />
@@ -306,7 +263,7 @@ export default function SessionPage() {
 
                                 <div className="h-6 w-[1px] bg-border" />
 
-                                <Select value={comparisonDriver || "none"} onValueChange={(v) => setComparisonDriver(v === "none" ? null : v)}>
+                                <Select value={comparisonDriver || "none"} onValueChange={(v) => setComparisonPick({ key: sessionKey || "", id: v === "none" ? null : v })}>
                                     <SelectTrigger className="w-[180px] bg-transparent border-none text-muted-foreground focus:ring-0 h-10 text-xs uppercase tracking-wider hover:bg-accent hover:text-foreground transition-colors">
                                         <div className="flex items-center gap-2">
                                             <Gauge className="w-3.5 h-3.5" />
@@ -371,7 +328,11 @@ export default function SessionPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => setIsPlaying(!isPlaying)}
+                                    onClick={() => setPlayback((prev) => ({
+                                        key: activeTelemetryKey,
+                                        index: prev.key === activeTelemetryKey ? prev.index : 0,
+                                        playing: !(prev.key === activeTelemetryKey && prev.playing),
+                                    }))}
                                     className="hover:bg-accent rounded-full w-10 h-10 text-foreground"
                                 >
                                     {isPlaying ? <Pause className="fill-current h-4 w-4" /> : <Play className="fill-current h-4 w-4" />}
@@ -385,8 +346,11 @@ export default function SessionPage() {
                                         disabled={telemetryData.length === 0}
                                         value={Math.min(playbackIndex, Math.max(0, telemetryData.length - 1))}
                                         onChange={(e) => {
-                                            setPlaybackIndex(parseInt(e.target.value, 10) || 0)
-                                            setIsPlaying(false)
+                                            setPlayback({
+                                                key: activeTelemetryKey,
+                                                index: parseInt(e.target.value, 10) || 0,
+                                                playing: false,
+                                            })
                                         }}
                                         className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-red-600 hover:accent-red-500 transition-all disabled:opacity-40"
                                     />
@@ -396,7 +360,7 @@ export default function SessionPage() {
                                     variant="ghost"
                                     size="icon"
                                     disabled={telemetryData.length === 0}
-                                    onClick={() => { setPlaybackIndex(0); setIsPlaying(false); }}
+                                    onClick={() => setPlayback({ key: activeTelemetryKey, index: 0, playing: false })}
                                     className="hover:bg-accent rounded-full w-8 h-8 text-muted-foreground hover:text-foreground"
                                 >
                                     <RotateCcw className="h-3 w-3" />

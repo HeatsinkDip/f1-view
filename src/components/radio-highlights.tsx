@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Radio, Play, Pause, Volume2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getTeamRadio, TeamRadioClip } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface RadioHighlightsProps {
     year?: number
@@ -12,39 +13,34 @@ interface RadioHighlightsProps {
     sessionType?: string
 }
 
+const EMPTY_RADIOS: TeamRadioClip[] = []
+
 export function RadioHighlights({
     year = new Date().getFullYear(),
     location = "Lusail",
     sessionType = "Race",
 }: RadioHighlightsProps) {
-    const [radios, setRadios] = useState<TeamRadioClip[]>([])
-    const [loading, setLoading] = useState(true)
-    const [playingUrl, setPlayingUrl] = useState<string | null>(null)
+    const sessionKey = `radio:${year}:${location}:${sessionType}`
+    const { data: radios, loading } = useAsyncData(
+        sessionKey,
+        () => getTeamRadio(year, location, sessionType).then((data) => data.radios || []).catch(() => []),
+        EMPTY_RADIOS
+    )
+    const [playingState, setPlayingState] = useState<{ key: string; url: string | null }>({
+        key: sessionKey,
+        url: null,
+    })
+    const playingUrl = playingState.key === sessionKey ? playingState.url : null
     const audioRef = useRef<HTMLAudioElement | null>(null)
 
     useEffect(() => {
-        let active = true
-        setLoading(true)
-        getTeamRadio(year, location, sessionType)
-            .then((data) => {
-                if (active) setRadios(data.radios || [])
-            })
-            .catch(() => {
-                if (active) setRadios([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-
         return () => {
-            active = false
             if (audioRef.current) {
                 audioRef.current.pause()
                 audioRef.current = null
             }
-            setPlayingUrl(null)
         }
-    }, [year, location, sessionType])
+    }, [sessionKey])
 
     const togglePlay = (url: string) => {
         if (!url.startsWith("https://")) {
@@ -52,7 +48,7 @@ export function RadioHighlights({
         }
         if (playingUrl === url && audioRef.current) {
             audioRef.current.pause()
-            setPlayingUrl(null)
+            setPlayingState({ key: sessionKey, url: null })
             return
         }
         if (audioRef.current) {
@@ -60,10 +56,10 @@ export function RadioHighlights({
         }
         const audio = new Audio(url)
         audioRef.current = audio
-        audio.onended = () => setPlayingUrl(null)
-        audio.onerror = () => setPlayingUrl(null)
-        audio.play().catch(() => setPlayingUrl(null))
-        setPlayingUrl(url)
+        audio.onended = () => setPlayingState({ key: sessionKey, url: null })
+        audio.onerror = () => setPlayingState({ key: sessionKey, url: null })
+        audio.play().catch(() => setPlayingState({ key: sessionKey, url: null }))
+        setPlayingState({ key: sessionKey, url })
     }
 
     return (

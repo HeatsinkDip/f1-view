@@ -1,33 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, CheckCircle } from "lucide-react"
 import { getStandings, DriverStanding } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface DriverMarketProps {
     year?: number
 }
 
-export function DriverMarket({ year = new Date().getFullYear() }: DriverMarketProps) {
-    const [drivers, setDrivers] = useState<DriverStanding[]>([])
-    const [loading, setLoading] = useState(true)
+const EMPTY_DRIVERS: DriverStanding[] = []
 
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getStandings(year)
-            .then((data) => {
-                if (active) setDrivers(data.drivers || [])
-            })
-            .catch(() => {
-                if (active) setDrivers([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year])
+export function DriverMarket({ year = new Date().getFullYear() }: DriverMarketProps) {
+    const { data: drivers, loading } = useAsyncData(
+        `market:${year}`,
+        () => getStandings(year).then((data) => data.drivers || []).catch(() => []),
+        EMPTY_DRIVERS
+    )
 
     return (
         <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">

@@ -1,15 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Flag } from "lucide-react"
 import { getRaceControl, RaceControlMessage } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface RaceControlFeedProps {
     year?: number
     location?: string
     sessionType?: string
 }
+
+const EMPTY_MESSAGES: RaceControlMessage[] = []
 
 function formatMessageTime(rawTime: unknown): string {
     if (typeof rawTime === "string" && rawTime.trim()) {
@@ -26,24 +28,11 @@ export function RaceControlFeed({
     location = "Lusail",
     sessionType = "Race",
 }: RaceControlFeedProps) {
-    const [messages, setMessages] = useState<RaceControlMessage[]>([])
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getRaceControl(year, location, sessionType)
-            .then((data) => {
-                if (active) setMessages(data.messages || [])
-            })
-            .catch(() => {
-                if (active) setMessages([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year, location, sessionType])
+    const { data: messages, loading } = useAsyncData(
+        `race_control:${year}:${location}:${sessionType}`,
+        () => getRaceControl(year, location, sessionType).then((data) => data.messages || []).catch(() => []),
+        EMPTY_MESSAGES
+    )
 
     if (loading) {
         return (

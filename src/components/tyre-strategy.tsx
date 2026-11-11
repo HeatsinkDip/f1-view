@@ -1,15 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CircleDot } from "lucide-react"
 import { getTyreStints, DriverStints } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface TyreStrategyProps {
     year?: number
     location?: string
     sessionType?: string
 }
+
+const EMPTY_STRATEGIES: DriverStints[] = []
 
 const COMPOUND_COLORS: Record<string, string> = {
     SOFT: "bg-red-600 text-white",
@@ -24,24 +26,11 @@ export function TyreStrategy({
     location = "Lusail",
     sessionType = "Race",
 }: TyreStrategyProps) {
-    const [strategies, setStrategies] = useState<DriverStints[]>([])
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getTyreStints(year, location, sessionType)
-            .then((data) => {
-                if (active) setStrategies(data.stints || [])
-            })
-            .catch(() => {
-                if (active) setStrategies([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year, location, sessionType])
+    const { data: strategies, loading } = useAsyncData(
+        `stints:${year}:${location}:${sessionType}`,
+        () => getTyreStints(year, location, sessionType).then((data) => data.stints || []).catch(() => []),
+        EMPTY_STRATEGIES
+    )
 
     if (loading) {
         return (

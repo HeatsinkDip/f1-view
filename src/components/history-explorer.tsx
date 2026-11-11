@@ -1,40 +1,29 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { History, Trophy, AlertCircle } from "lucide-react"
 import { getHistory, HistoryEntry } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface HistoryExplorerProps {
     location?: string
     availableLocations?: string[]
 }
 
+const EMPTY_HISTORY: HistoryEntry[] = []
+
 export function HistoryExplorer({ location = "Lusail", availableLocations }: HistoryExplorerProps) {
-    const [history, setHistory] = useState<HistoryEntry[]>([])
-    const [loading, setLoading] = useState(true)
-    const [selectedLocation, setSelectedLocation] = useState(location)
+    const [locationOverride, setLocationOverride] = useState<{ base: string; value: string } | null>(null)
+    const selectedLocation =
+        locationOverride && locationOverride.base === location ? locationOverride.value : location
 
-    useEffect(() => {
-        setSelectedLocation(location)
-    }, [location])
-
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getHistory(selectedLocation)
-            .then((data) => {
-                if (active) setHistory(data.history || [])
-            })
-            .catch(() => {
-                if (active) setHistory([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [selectedLocation])
+    const { data: history, loading } = useAsyncData(
+        `history:${selectedLocation}`,
+        () => getHistory(selectedLocation).then((data) => data.history || []).catch(() => []),
+        EMPTY_HISTORY
+    )
 
     const locationOptions = availableLocations && availableLocations.length > 0
         ? Array.from(new Set([selectedLocation, ...availableLocations]))
@@ -64,7 +53,7 @@ export function HistoryExplorer({ location = "Lusail", availableLocations }: His
             </CardHeader>
             <CardContent className="p-6">
                 <div className="mb-5">
-                    <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                    <Select value={selectedLocation} onValueChange={(val) => setLocationOverride({ base: location, value: val })}>
                         <SelectTrigger className="bg-background border-border">
                             <SelectValue placeholder="Select Circuit" />
                         </SelectTrigger>

@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Trophy, AlertCircle } from "lucide-react"
 import { getStandings, DriverStanding, ConstructorStanding, handleDriverImageError, toHighResDriverImage } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface StandingsWidgetProps {
     year?: number
@@ -15,36 +15,23 @@ function teamHex(rawColor?: string): string {
     return clean ? `#${clean}` : "#71717A"
 }
 
-export function StandingsWidget({ year = new Date().getFullYear() }: StandingsWidgetProps) {
-    const [standings, setStandings] = useState<{
-        drivers: DriverStanding[]
-        constructors: ConstructorStanding[]
-    }>({ drivers: [], constructors: [] })
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+const EMPTY_STANDINGS: {
+    drivers: DriverStanding[]
+    constructors: ConstructorStanding[]
+} = { drivers: [], constructors: [] }
 
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        setError(null)
-        getStandings(year)
-            .then((data) => {
-                if (!active) return
-                setStandings({
-                    drivers: data.drivers || [],
-                    constructors: data.constructors || [],
-                })
-            })
-            .catch((err: unknown) => {
-                if (!active) return
-                setError(err instanceof Error ? err.message : "Failed to load standings")
-                setStandings({ drivers: [], constructors: [] })
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year])
+export function StandingsWidget({ year = new Date().getFullYear() }: StandingsWidgetProps) {
+    const { data: standings, loading, error } = useAsyncData(
+        `standings:${year}`,
+        async () => {
+            const data = await getStandings(year)
+            return {
+                drivers: data.drivers || [],
+                constructors: data.constructors || [],
+            }
+        },
+        EMPTY_STANDINGS
+    )
 
     if (loading) {
         return (

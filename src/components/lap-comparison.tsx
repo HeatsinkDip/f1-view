@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Timer } from "lucide-react"
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts"
 import { getLapComparison } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface LapComparisonProps {
     year?: number
@@ -13,54 +13,45 @@ interface LapComparisonProps {
 }
 
 const FALLBACK_COLORS = ["#FF1801", "#FF8700", "#00D2BE", "#3671C6"]
+const EMPTY_COMPARISON: { data: Record<string, number>[]; seriesMeta: { key: string; color: string }[] } = {
+    data: [],
+    seriesMeta: [],
+}
 
 export function LapComparison({
     year = new Date().getFullYear(),
     location = "Lusail",
     sessionType = "Race",
 }: LapComparisonProps) {
-    const [data, setData] = useState<Record<string, number>[]>([])
-    const [seriesMeta, setSeriesMeta] = useState<{ key: string; color: string }[]>([])
-    const [loading, setLoading] = useState(true)
+    const { data: comparisonState, loading } = useAsyncData(
+        `laps:${year}:${location}:${sessionType}`,
+        async () => {
+            const res = await getLapComparison(year, location, sessionType).catch(() => ({ comparison: [] }))
+            const comparisonData = res.comparison || []
+            const lapMap = new Map<number, Record<string, number>>()
+            const metas: { key: string; color: string }[] = []
 
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getLapComparison(year, location, sessionType)
-            .then((res) => {
-                if (!active) return
-                const comparisonData = res.comparison || []
-                const lapMap = new Map<number, Record<string, number>>()
-                const metas: { key: string; color: string }[] = []
-
-                comparisonData.forEach((d, idx) => {
-                    const colorHex = d.color
-                        ? `#${d.color.replace(/^#/, "")}`
-                        : FALLBACK_COLORS[idx % FALLBACK_COLORS.length]
-                    metas.push({ key: d.driver, color: colorHex })
-                    for (const pt of d.laps || []) {
-                        if (!lapMap.has(pt.lap)) {
-                            lapMap.set(pt.lap, { lap: pt.lap })
-                        }
-                        lapMap.get(pt.lap)![d.driver] = pt.time
+            comparisonData.forEach((d, idx) => {
+                const colorHex = d.color
+                    ? `#${d.color.replace(/^#/, "")}`
+                    : FALLBACK_COLORS[idx % FALLBACK_COLORS.length]
+                metas.push({ key: d.driver, color: colorHex })
+                for (const pt of d.laps || []) {
+                    if (!lapMap.has(pt.lap)) {
+                        lapMap.set(pt.lap, { lap: pt.lap })
                     }
-                })
-
-                const transformed = Array.from(lapMap.values()).sort((a, b) => a.lap - b.lap)
-                setSeriesMeta(metas)
-                setData(transformed)
-            })
-            .catch(() => {
-                if (active) {
-                    setData([])
-                    setSeriesMeta([])
+                    lapMap.get(pt.lap)![d.driver] = pt.time
                 }
             })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year, location, sessionType])
+
+            return {
+                data: Array.from(lapMap.values()).sort((a, b) => a.lap - b.lap),
+                seriesMeta: metas,
+            }
+        },
+        EMPTY_COMPARISON
+    )
+    const { data, seriesMeta } = comparisonState
 
     if (loading) {
         return (

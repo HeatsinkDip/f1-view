@@ -12,6 +12,7 @@ import {
   AuthStatusResponse,
   Event,
 } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -43,8 +44,6 @@ function getRaceTimestamp(ev: Event): Date {
 
 export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR)
-  const [schedule, setSchedule] = useState<ScheduleResponse | null>(null)
-  const [winnerDriver, setWinnerDriver] = useState<Driver | null>(null)
   const [authStatus, setAuthStatus] = useState<AuthStatusResponse | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [f1Email, setF1Email] = useState("")
@@ -52,32 +51,15 @@ export default function Dashboard() {
   const [authSubmitting, setAuthSubmitting] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
   useEffect(() => {
     getAuthStatus().then(setAuthStatus).catch(() => null)
   }, [])
 
-  useEffect(() => {
-    let active = true
-    setLoading(true)
-    setError(null)
-    setWinnerDriver(null)
-
-    getSchedule(selectedYear)
-      .then((data) => {
-        if (active) setSchedule(data)
-      })
-      .catch((err: unknown) => {
-        if (active) setError(err instanceof Error ? err.message : "Failed to load schedule")
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-
-    return () => { active = false }
-  }, [selectedYear])
+  const { data: schedule, loading, error } = useAsyncData<ScheduleResponse | null>(
+    `schedule:${selectedYear}`,
+    () => getSchedule(selectedYear),
+    null
+  )
 
   const { nextRace, lastCompletedRace, dataContextEvent, sessionType } = useMemo(() => {
     const now = new Date()
@@ -117,23 +99,16 @@ export default function Dashboard() {
     }
   }, [schedule])
 
-  useEffect(() => {
-    if (!lastCompletedRace) {
-      setWinnerDriver(null)
-      return
-    }
-    let active = true
-    getSessionDrivers(selectedYear, lastCompletedRace.Location, "Race")
-      .then((drivers) => {
-        if (active && drivers.length > 0) {
-          setWinnerDriver(drivers[0])
-        }
-      })
-      .catch(() => {
-        if (active) setWinnerDriver(null)
-      })
-    return () => { active = false }
-  }, [selectedYear, lastCompletedRace])
+  const winnerKey = lastCompletedRace ? `winner:${selectedYear}:${lastCompletedRace.Location}` : null
+  const { data: winnerDriver } = useAsyncData<Driver | null>(
+    winnerKey,
+    async () => {
+      if (!lastCompletedRace) return null
+      const drivers = await getSessionDrivers(selectedYear, lastCompletedRace.Location, "Race").catch(() => [])
+      return drivers.length > 0 ? drivers[0] : null
+    },
+    null
+  )
 
   const handleF1Login = async (e: React.FormEvent) => {
     e.preventDefault()

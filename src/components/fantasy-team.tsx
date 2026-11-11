@@ -6,12 +6,17 @@ import { Users, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getStandings, DriverStanding, ConstructorStanding } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface FantasyTeamProps {
     year?: number
 }
 
 const TOTAL_BUDGET = 100.0
+const EMPTY_STANDINGS: { drivers: DriverStanding[]; constructors: ConstructorStanding[] } = {
+    drivers: [],
+    constructors: [],
+}
 
 function driverPrice(points: number, pos: number): number {
     const raw = Math.max(6.0, 28.0 - (pos - 1) * 1.1 + points * 0.01)
@@ -23,49 +28,50 @@ function constructorPrice(pos: number): number {
 }
 
 export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProps) {
-    const [drivers, setDrivers] = useState<DriverStanding[]>([])
-    const [constructors, setConstructors] = useState<ConstructorStanding[]>([])
+    const { data: standingsData } = useAsyncData(
+        `fantasy-standings:${year}`,
+        async () => {
+            const data = await getStandings(year).catch(() => ({ drivers: [], constructors: [] }))
+            return {
+                drivers: data.drivers || [],
+                constructors: data.constructors || [],
+            }
+        },
+        EMPTY_STANDINGS
+    )
+    const { drivers, constructors } = standingsData
+
     const [selectedDrivers, setSelectedDrivers] = useState<string[]>(["", "", "", "", ""])
     const [selectedConstructor, setSelectedConstructor] = useState<string>("")
-    const [saved, setSaved] = useState(false)
+    const [savedYear, setSavedYear] = useState<number | null>(null)
+    const saved = savedYear === year
 
     const storageKey = `f1view_fantasy_${year}`
 
     useEffect(() => {
         let active = true
-        setSaved(false)
-        try {
-            const raw = localStorage.getItem(storageKey)
-            if (raw) {
-                const parsed = JSON.parse(raw)
-                if (Array.isArray(parsed.drivers) && parsed.drivers.length === 5) {
-                    setSelectedDrivers(parsed.drivers)
+        queueMicrotask(() => {
+            if (!active) return
+            try {
+                const raw = localStorage.getItem(storageKey)
+                if (raw) {
+                    const parsed = JSON.parse(raw)
+                    setSelectedDrivers(
+                        Array.isArray(parsed.drivers) && parsed.drivers.length === 5
+                            ? parsed.drivers
+                            : ["", "", "", "", ""]
+                    )
+                    setSelectedConstructor(typeof parsed.constructor === "string" ? parsed.constructor : "")
+                    return
                 }
-                if (typeof parsed.constructor === "string") {
-                    setSelectedConstructor(parsed.constructor)
-                }
-            } else {
-                setSelectedDrivers(["", "", "", "", ""])
-                setSelectedConstructor("")
+            } catch {
+                // Ignore malformed local storage
             }
-        } catch {
-            // Ignore malformed local storage
-        }
-
-        getStandings(year)
-            .then((data) => {
-                if (!active) return
-                setDrivers(data.drivers || [])
-                setConstructors(data.constructors || [])
-            })
-            .catch(() => {
-                if (active) {
-                    setDrivers([])
-                    setConstructors([])
-                }
-            })
+            setSelectedDrivers(["", "", "", "", ""])
+            setSelectedConstructor("")
+        })
         return () => { active = false }
-    }, [year, storageKey])
+    }, [storageKey])
 
     const spentDrivers = selectedDrivers.reduce((sum, code) => {
         const found = drivers.find((d) => d.code === code)
@@ -88,8 +94,8 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
                 storageKey,
                 JSON.stringify({ drivers: selectedDrivers, constructor: selectedConstructor })
             )
-            setSaved(true)
-            setTimeout(() => setSaved(false), 2500)
+            setSavedYear(year)
+            setTimeout(() => setSavedYear(null), 2500)
         } catch {
             // Ignore quota errors
         }
@@ -121,7 +127,7 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
                                 const updated = [...selectedDrivers]
                                 updated[slotIdx] = nextVal === "empty" ? "" : nextVal
                                 setSelectedDrivers(updated)
-                                setSaved(false)
+                                setSavedYear(null)
                             }}
                         >
                             <SelectTrigger className="h-10 bg-background border-border text-xs font-mono">
@@ -148,7 +154,7 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
                         value={selectedConstructor || "empty"}
                         onValueChange={(nextVal) => {
                             setSelectedConstructor(nextVal === "empty" ? "" : nextVal)
-                            setSaved(false)
+                            setSavedYear(null)
                         }}
                     >
                         <SelectTrigger className="h-10 bg-background border-border text-xs font-mono">

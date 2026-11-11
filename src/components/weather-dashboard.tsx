@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CloudRain, Thermometer, Wind, Droplets } from "lucide-react"
 import { getWeather, WeatherPoint } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface WeatherDashboardProps {
     year?: number
@@ -20,29 +20,16 @@ export function WeatherDashboard({
     location = "Lusail",
     sessionType = "Race",
 }: WeatherDashboardProps) {
-    const [loading, setLoading] = useState(true)
-    const [currentWeather, setCurrentWeather] = useState<WeatherPoint | null>(null)
-
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getWeather(year, location, sessionType)
-            .then((data) => {
-                if (!active) return
-                if (data.weather && data.weather.length > 0) {
-                    setCurrentWeather(data.weather[data.weather.length - 1])
-                } else {
-                    setCurrentWeather(null)
-                }
-            })
-            .catch(() => {
-                if (active) setCurrentWeather(null)
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year, location, sessionType])
+    const { data: currentWeather, loading } = useAsyncData<WeatherPoint | null>(
+        `weather:${year}:${location}:${sessionType}`,
+        async () => {
+            const data = await getWeather(year, location, sessionType).catch(() => ({ weather: [] }))
+            return data.weather && data.weather.length > 0
+                ? data.weather[data.weather.length - 1]
+                : null
+        },
+        null
+    )
 
     if (loading) {
         return (

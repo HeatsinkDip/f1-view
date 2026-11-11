@@ -1,17 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts"
 import { Users, Zap, AlertCircle } from "lucide-react"
 import { getSessionDrivers, getDriverTelemetry, Driver, TelemetryPoint } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface DriverComparisonProps {
     year?: number
     location?: string
     sessionType?: string
 }
+
+const EMPTY_DRIVERS: Driver[] = []
+const EMPTY_TELEMETRY: { distance: number; speed1: number; speed2: number | null }[] = []
 
 function findClosestSpeed(points: TelemetryPoint[], distance: number): number | null {
     if (!points.length) return null
@@ -32,70 +36,35 @@ export function DriverComparison({
     location = "Lusail",
     sessionType = "Race",
 }: DriverComparisonProps) {
-    const [drivers, setDrivers] = useState<Driver[]>([])
-    const [driver1Id, setDriver1Id] = useState<string>("")
-    const [driver2Id, setDriver2Id] = useState<string>("")
-    const [telemetryData, setTelemetryData] = useState<{ distance: number; speed1: number; speed2: number | null }[]>([])
-    const [loading, setLoading] = useState(true)
-    const [chartLoading, setChartLoading] = useState(false)
+    const sessionKey = `cmp:${year}:${location}:${sessionType}`
+    const { data: drivers, loading } = useAsyncData(
+        sessionKey,
+        () => getSessionDrivers(year, location, sessionType).catch(() => []),
+        EMPTY_DRIVERS
+    )
 
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        setDrivers([])
-        setDriver1Id("")
-        setDriver2Id("")
-        setTelemetryData([])
+    const [picks, setPicks] = useState<{ key: string; d1?: string; d2?: string }>({ key: sessionKey })
+    const driver1Id = (picks.key === sessionKey && picks.d1) || drivers[0]?.id || ""
+    const driver2Id = (picks.key === sessionKey && picks.d2) || drivers[1]?.id || ""
 
-        getSessionDrivers(year, location, sessionType)
-            .then((driversList) => {
-                if (!active) return
-                setDrivers(driversList)
-                if (driversList.length >= 2) {
-                    setDriver1Id(driversList[0].id)
-                    setDriver2Id(driversList[1].id)
-                } else if (driversList.length === 1) {
-                    setDriver1Id(driversList[0].id)
-                }
-            })
-            .catch(() => {
-                if (active) setDrivers([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year, location, sessionType])
-
-    useEffect(() => {
-        if (!driver1Id || !driver2Id) return
-        let active = true
-        setChartLoading(true)
-
-        Promise.all([
-            getDriverTelemetry(year, location, sessionType, driver1Id, 180),
-            getDriverTelemetry(year, location, sessionType, driver2Id, 180),
-        ])
-            .then(([t1, t2]) => {
-                if (!active) return
-                const data1 = t1.telemetry || []
-                const data2 = t2.telemetry || []
-                const merged = data1.map((pt) => ({
-                    distance: pt.distance,
-                    speed1: pt.speed,
-                    speed2: findClosestSpeed(data2, pt.distance),
-                }))
-                setTelemetryData(merged)
-            })
-            .catch(() => {
-                if (active) setTelemetryData([])
-            })
-            .finally(() => {
-                if (active) setChartLoading(false)
-            })
-
-        return () => { active = false }
-    }, [driver1Id, driver2Id, year, location, sessionType])
+    const chartKey = driver1Id && driver2Id ? `${sessionKey}:${driver1Id}:${driver2Id}` : null
+    const { data: telemetryData, loading: chartLoading } = useAsyncData(
+        chartKey,
+        async () => {
+            const [t1, t2] = await Promise.all([
+                getDriverTelemetry(year, location, sessionType, driver1Id, 180),
+                getDriverTelemetry(year, location, sessionType, driver2Id, 180),
+            ])
+            const data1 = t1.telemetry || []
+            const data2 = t2.telemetry || []
+            return data1.map((pt) => ({
+                distance: pt.distance,
+                speed1: pt.speed,
+                speed2: findClosestSpeed(data2, pt.distance),
+            }))
+        },
+        EMPTY_TELEMETRY
+    )
 
     const d1 = drivers.find((d) => d.id === driver1Id)
     const d2 = drivers.find((d) => d.id === driver2Id)
@@ -125,7 +94,16 @@ export function DriverComparison({
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <div className="space-y-2">
                         <label className="text-xs text-muted-foreground uppercase font-mono">Driver 1</label>
-                        <Select value={driver1Id} onValueChange={setDriver1Id}>
+                        <Select
+                            value={driver1Id}
+                            onValueChange={(val) =>
+                                setPicks((prev) => ({
+                                    key: sessionKey,
+                                    d1: val,
+                                    d2: prev.key === sessionKey ? prev.d2 : driver2Id,
+                                }))
+                            }
+                        >
                             <SelectTrigger className="bg-background border-border">
                                 <SelectValue placeholder="Select driver" />
                             </SelectTrigger>
@@ -148,7 +126,16 @@ export function DriverComparison({
 
                     <div className="space-y-2">
                         <label className="text-xs text-muted-foreground uppercase font-mono">Driver 2</label>
-                        <Select value={driver2Id} onValueChange={setDriver2Id}>
+                        <Select
+                            value={driver2Id}
+                            onValueChange={(val) =>
+                                setPicks((prev) => ({
+                                    key: sessionKey,
+                                    d1: prev.key === sessionKey ? prev.d1 : driver1Id,
+                                    d2: val,
+                                }))
+                            }
+                        >
                             <SelectTrigger className="bg-background border-border">
                                 <SelectValue placeholder="Select driver" />
                             </SelectTrigger>

@@ -1,33 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Swords } from "lucide-react"
 import { getRivalry, RivalryDriver } from "@/lib/api"
+import { useAsyncData } from "@/lib/use-async-data"
 
 interface RivalryWatchProps {
     year?: number
 }
 
-export function RivalryWatch({ year = new Date().getFullYear() }: RivalryWatchProps) {
-    const [rivals, setRivals] = useState<RivalryDriver[]>([])
-    const [loading, setLoading] = useState(true)
+const EMPTY_RIVALS: RivalryDriver[] = []
 
-    useEffect(() => {
-        let active = true
-        setLoading(true)
-        getRivalry(year)
-            .then((data) => {
-                if (active) setRivals(data.rivals || [])
-            })
-            .catch(() => {
-                if (active) setRivals([])
-            })
-            .finally(() => {
-                if (active) setLoading(false)
-            })
-        return () => { active = false }
-    }, [year])
+export function RivalryWatch({ year = new Date().getFullYear() }: RivalryWatchProps) {
+    const { data: rivals, loading } = useAsyncData(
+        `rivalry:${year}`,
+        () => getRivalry(year).then((data) => data.rivals || []).catch(() => []),
+        EMPTY_RIVALS
+    )
 
     if (loading || rivals.length < 2) {
         return (
