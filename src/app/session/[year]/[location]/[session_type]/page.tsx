@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Play, Pause, RotateCcw, Activity, Gauge, Wind, Radio, Flag } from "lucide-react"
+import { ArrowLeft, Play, Pause, RotateCcw, Activity, Gauge } from "lucide-react"
 import { getSessionDetails, getSessionDrivers, getDriverTelemetry, getTrackData, SessionDetails, Driver, TelemetryPoint, TrackPoint } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,14 +15,14 @@ import { StrategyPredictor } from "@/components/strategy-predictor"
 import { WeatherRadar } from "@/components/weather-radar"
 import { TeamRadio } from "@/components/team-radio"
 import { TyreAnalysis } from "@/components/tyre-analysis"
-import { RaceControl } from "@/components/race-control"
 import { F1Loader } from "@/components/f1-loader"
 
 export default function SessionPage() {
     const params = useParams()
-    const year = parseInt(params.year as string)
-    const location = params.location as string
-    const sessionType = params.session_type as string
+    const router = useRouter()
+    const year = parseInt(params.year as string, 10)
+    const rawLocation = decodeURIComponent((params.location as string) || "")
+    const sessionType = decodeURIComponent((params.session_type as string) || "Race")
 
     const [session, setSession] = useState<SessionDetails | null>(null)
     const [drivers, setDrivers] = useState<Driver[]>([])
@@ -33,6 +33,7 @@ export default function SessionPage() {
     const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
     const [telemetryData, setTelemetryData] = useState<TelemetryPoint[]>([])
     const [telemetryLoading, setTelemetryLoading] = useState(false)
+    const [telemetryError, setTelemetryError] = useState<string | null>(null)
 
     const [comparisonDriver, setComparisonDriver] = useState<string | null>(null)
     const [comparisonTelemetryData, setComparisonTelemetryData] = useState<TelemetryPoint[]>([])
@@ -43,80 +44,109 @@ export default function SessionPage() {
 
     useEffect(() => {
         let interval: NodeJS.Timeout
-        if (isPlaying) {
+        if (isPlaying && telemetryData.length > 0) {
             interval = setInterval(() => {
                 setPlaybackIndex(prev => {
                     if (prev >= telemetryData.length - 1) {
                         setIsPlaying(false)
                         return prev
                     }
-                    return prev + 1 // Speed up by skipping points if needed: prev + 5
+                    return prev + 1
                 })
-            }, 50) // 20fps
+            }, 50)
         }
         return () => clearInterval(interval)
-    }, [isPlaying, telemetryData?.length])
+    }, [isPlaying, telemetryData.length])
 
     useEffect(() => {
+        let active = true
+        setLoading(true)
+        setError(null)
+        setSelectedDriver(null)
+        setComparisonDriver(null)
+        setTelemetryData([])
+        setComparisonTelemetryData([])
+        setPlaybackIndex(0)
+        setIsPlaying(false)
+
         const fetchData = async () => {
             try {
                 const [sessionData, driversData, track] = await Promise.all([
-                    getSessionDetails(year, location, sessionType),
-                    getSessionDrivers(year, location, sessionType),
-                    getTrackData(year, location, sessionType)
+                    getSessionDetails(year, rawLocation, sessionType),
+                    getSessionDrivers(year, rawLocation, sessionType),
+                    getTrackData(year, rawLocation, sessionType).catch(() => ({ circuit_name: rawLocation, track_data: [] }))
                 ])
+                if (!active) return
                 setSession(sessionData)
                 setDrivers(driversData)
-                setTrackData(track.track_data)
+                setTrackData(track.track_data || [])
                 if (driversData.length > 0) {
-                    // Default to winner or first driver
                     setSelectedDriver(driversData[0].id)
                 }
-            } catch (err: any) {
-                setError(err.message)
+            } catch (err: unknown) {
+                if (!active) return
+                setError(err instanceof Error ? err.message : "Failed to load session")
             } finally {
-                setLoading(false)
+                if (active) setLoading(false)
             }
         }
 
-        fetchData()
-    }, [year, location, sessionType])
+        if (!Number.isNaN(year) && rawLocation) {
+            fetchData()
+        } else {
+            setError("Invalid session parameters")
+            setLoading(false)
+        }
+
+        return () => { active = false }
+    }, [year, rawLocation, sessionType])
 
     useEffect(() => {
         if (!selectedDriver) return
+        let active = true
+        setPlaybackIndex(0)
+        setIsPlaying(false)
+        setTelemetryError(null)
 
         const fetchTelemetry = async () => {
             setTelemetryLoading(true)
             try {
-                const data = await getDriverTelemetry(year, location, sessionType, selectedDriver)
-                setTelemetryData(data.telemetry)
-            } catch (err) {
-                console.error("Failed to load telemetry", err)
+                const data = await getDriverTelemetry(year, rawLocation, sessionType, selectedDriver)
+                if (!active) return
+                setTelemetryData(data.telemetry || [])
+            } catch (err: unknown) {
+                if (!active) return
+                setTelemetryData([])
+                setTelemetryError(err instanceof Error ? err.message : "Failed to load telemetry")
             } finally {
-                setTelemetryLoading(false)
+                if (active) setTelemetryLoading(false)
             }
         }
 
         fetchTelemetry()
-    }, [selectedDriver, year, location, sessionType])
+        return () => { active = false }
+    }, [selectedDriver, year, rawLocation, sessionType])
 
     useEffect(() => {
         if (!comparisonDriver) {
             setComparisonTelemetryData([])
             return
         }
+        let active = true
 
         const fetchComparisonTelemetry = async () => {
             try {
-                const data = await getDriverTelemetry(year, location, sessionType, comparisonDriver)
-                setComparisonTelemetryData(data.telemetry)
+                const data = await getDriverTelemetry(year, rawLocation, sessionType, comparisonDriver)
+                if (active) setComparisonTelemetryData(data.telemetry || [])
             } catch (err) {
                 console.error("Failed to load comparison telemetry", err)
+                if (active) setComparisonTelemetryData([])
             }
         }
 
         fetchComparisonTelemetry()
-    }, [comparisonDriver, year, location, sessionType])
+        return () => { active = false }
+    }, [comparisonDriver, year, rawLocation, sessionType])
 
     if (loading) {
         return (
@@ -129,6 +159,11 @@ export default function SessionPage() {
         )
     }
     if (error) return <div className="flex h-screen items-center justify-center text-red-500 bg-zinc-950">Error: {error}</div>
+
+    const activeDriverObj = drivers.find(d => d.id === selectedDriver)
+    const availableSessions = session?.available_sessions && session.available_sessions.length > 0
+        ? session.available_sessions
+        : ["Practice 1", "Qualifying", "Race"]
 
     // Handle future sessions where data is missing
     if (!trackData || trackData.length === 0) {
@@ -150,14 +185,14 @@ export default function SessionPage() {
                     <div>
                         <h1 className="text-5xl font-black italic uppercase mb-4 tracking-tighter">Session Upcoming</h1>
                         <p className="text-zinc-400 text-lg">
-                            Telemetry for the <span className="text-white font-bold">{sessionType}</span> at <span className="text-white font-bold">{location}</span> is initializing.
+                            Telemetry for <span className="text-white font-bold">{sessionType}</span> at <span className="text-white font-bold">{rawLocation} ({year})</span> is not available yet.
                         </p>
                     </div>
 
                     <div className="flex flex-col gap-4 w-full">
-                        {sessionType === "Race" && (
+                        {sessionType !== "Qualifying" && (
                             <Button asChild size="lg" className="w-full bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-wider h-14 text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-[1.02]">
-                                <Link href={`/session/${year}/${encodeURIComponent(location)}/Qualifying`}>
+                                <Link href={`/session/${year}/${encodeURIComponent(rawLocation)}/Qualifying`}>
                                     View Qualifying Analysis <ArrowLeft className="ml-2 w-5 h-5 rotate-180" />
                                 </Link>
                             </Button>
@@ -202,19 +237,38 @@ export default function SessionPage() {
 
                             <div>
                                 <h1 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none bg-gradient-to-r from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                                    {session?.location} <span className="text-red-600 drop-shadow-[0_0_20px_rgba(220,38,38,0.6)]">GP</span>
+                                    {session?.location || rawLocation} <span className="text-red-600 drop-shadow-[0_0_20px_rgba(220,38,38,0.6)]">{year}</span>
                                 </h1>
-                                <div className="flex items-center gap-3 mt-2">
-                                    <Badge variant="outline" className="text-xs font-mono text-zinc-300 uppercase border-zinc-700 bg-zinc-900/80 px-3 py-1 backdrop-blur-sm">
-                                        {session?.session_type}
-                                    </Badge>
-                                    <div className="flex items-center gap-2 text-[10px] font-mono text-red-500 animate-pulse">
+                                <div className="flex flex-wrap items-center gap-3 mt-2">
+                                    <Select
+                                        value={sessionType}
+                                        onValueChange={(nextSession) => {
+                                            router.push(`/session/${year}/${encodeURIComponent(rawLocation)}/${encodeURIComponent(nextSession)}`)
+                                        }}
+                                    >
+                                        <SelectTrigger className="h-7 w-auto min-w-[130px] text-xs font-mono text-zinc-200 uppercase border-zinc-700 bg-zinc-900/80 px-3">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                                            {availableSessions.map((sName) => (
+                                                <SelectItem key={sName} value={sName} className="text-xs font-mono uppercase">
+                                                    {sName}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <div className="flex items-center gap-2 text-[10px] font-mono text-red-500">
                                         <span className="relative flex h-2 w-2">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                                             <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
                                         </span>
-                                        TELEMETRY ACTIVE
+                                        {telemetryLoading ? "LOADING TELEMETRY..." : telemetryError ? "TELEMETRY PARTIAL" : "TELEMETRY READY"}
                                     </div>
+                                    {session?.source && (
+                                        <Badge className="text-[10px] font-mono uppercase border-zinc-800 bg-zinc-900 text-zinc-400">
+                                            {session.source}
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -319,19 +373,21 @@ export default function SessionPage() {
                                     <input
                                         type="range"
                                         min="0"
-                                        max={telemetryData.length - 1}
-                                        value={playbackIndex}
+                                        max={Math.max(0, telemetryData.length - 1)}
+                                        disabled={telemetryData.length === 0}
+                                        value={Math.min(playbackIndex, Math.max(0, telemetryData.length - 1))}
                                         onChange={(e) => {
-                                            setPlaybackIndex(parseInt(e.target.value))
+                                            setPlaybackIndex(parseInt(e.target.value, 10) || 0)
                                             setIsPlaying(false)
                                         }}
-                                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-red-600 hover:accent-red-500 transition-all"
+                                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-red-600 hover:accent-red-500 transition-all disabled:opacity-40"
                                     />
                                 </div>
 
                                 <Button
                                     variant="ghost"
                                     size="icon"
+                                    disabled={telemetryData.length === 0}
                                     onClick={() => { setPlaybackIndex(0); setIsPlaying(false); }}
                                     className="hover:bg-white/10 rounded-full w-8 h-8 text-zinc-400 hover:text-white"
                                 >
@@ -343,10 +399,16 @@ export default function SessionPage() {
                         {/* Widgets Deck */}
                         <div className="flex-1 grid grid-cols-2 gap-4 min-h-[200px]">
                             <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-1 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
-                                <StrategyPredictor />
+                                <StrategyPredictor
+                                    year={year}
+                                    location={rawLocation}
+                                    sessionType={sessionType}
+                                    driverId={selectedDriver || undefined}
+                                    driverCode={activeDriverObj?.code}
+                                />
                             </div>
                             <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-1 backdrop-blur-sm hover:bg-zinc-900/50 transition-colors">
-                                <WeatherRadar />
+                                <WeatherRadar year={year} location={rawLocation} sessionType={sessionType} />
                             </div>
                         </div>
                     </div>
@@ -356,10 +418,21 @@ export default function SessionPage() {
                         {/* Radio & Tyres */}
                         <div className="grid grid-cols-2 gap-4 h-72 shrink-0">
                             <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden">
-                                <TeamRadio />
+                                <TeamRadio
+                                    year={year}
+                                    location={rawLocation}
+                                    sessionType={sessionType}
+                                    driverCode={activeDriverObj?.code}
+                                />
                             </div>
                             <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl overflow-hidden">
-                                <TyreAnalysis />
+                                <TyreAnalysis
+                                    year={year}
+                                    location={rawLocation}
+                                    sessionType={sessionType}
+                                    driverId={selectedDriver || undefined}
+                                    driverCode={activeDriverObj?.code}
+                                />
                             </div>
                         </div>
 
@@ -433,7 +506,7 @@ export default function SessionPage() {
     )
 }
 
-function Badge({ children, className, variant }: { children: React.ReactNode, className?: string, variant?: string }) {
+function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
     return (
         <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className}`}>
             {children}

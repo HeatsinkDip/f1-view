@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Timer } from "lucide-react"
 
 interface NextRaceCountdownProps {
     targetDate: string | Date

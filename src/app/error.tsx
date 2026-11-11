@@ -32,7 +32,7 @@ export default function Error({
                         Engine Failure
                     </h1>
                     <p className="text-zinc-400 font-mono text-sm">
-                        We've encountered a critical mechanical issue.
+                        We&apos;ve encountered a critical mechanical issue.
                     </p>
                 </div>
 

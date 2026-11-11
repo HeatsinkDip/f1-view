@@ -1,7 +1,7 @@
 "use client"
 
+import { useMemo } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TelemetryPoint } from "@/lib/api"
 
 interface TelemetryChartProps {
@@ -13,14 +13,39 @@ interface TelemetryChartProps {
     activeIndex?: number;
 }
 
-export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var(--primary))", unit = "", activeIndex }: TelemetryChartProps) {
-    const chartData = data.map((point, i) => {
-        const betterMatch = comparisonData?.find(p => Math.abs(p.distance - point.distance) < 50);
-        return {
-            ...point,
-            val2: betterMatch ? betterMatch[dataKey] : null
+function findClosestByDistance(points: TelemetryPoint[], targetDist: number): TelemetryPoint | null {
+    if (!points || points.length === 0) return null;
+    let best: TelemetryPoint | null = null;
+    let bestDiff = Infinity;
+    for (const p of points) {
+        const diff = Math.abs(p.distance - targetDist);
+        if (diff < bestDiff) {
+            bestDiff = diff;
+            best = p;
         }
-    });
+    }
+    return bestDiff <= 150 ? best : null;
+}
+
+export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var(--primary))", unit = "", activeIndex }: TelemetryChartProps) {
+    const chartData = useMemo(() => {
+        const hasComp = comparisonData && comparisonData.length > 0;
+        return data.map((point) => {
+            const closest = hasComp ? findClosestByDistance(comparisonData, point.distance) : null;
+            return {
+                ...point,
+                val2: closest ? closest[dataKey] : null
+            };
+        });
+    }, [data, comparisonData, dataKey]);
+
+    if (!data || data.length === 0) {
+        return (
+            <div className="h-full w-full flex items-center justify-center text-xs font-mono text-zinc-500 uppercase tracking-wider">
+                Telemetry unavailable
+            </div>
+        );
+    }
 
     return (
         <div className="h-full w-full">
@@ -41,7 +66,7 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
                     <Tooltip
                         contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
                         itemStyle={{ color: '#fff' }}
-                        formatter={(value: number) => [`${value}${unit}`]}
+                        formatter={(value: number | string) => [`${value}${unit}`]}
                         labelFormatter={() => ''}
                     />
                     <Line
@@ -52,7 +77,7 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
                         strokeWidth={2}
                         isAnimationActive={false}
                     />
-                    {comparisonData && (
+                    {comparisonData && comparisonData.length > 0 && (
                         <Line
                             type="monotone"
                             dataKey="val2"

@@ -19,7 +19,7 @@ export default function NotFound() {
                         Off Track
                     </h1>
                     <p className="text-zinc-400 font-mono text-sm">
-                        You've gone wide! This page doesn't exist.
+                        You&apos;ve gone wide! This page doesn&apos;t exist.
                     </p>
                 </div>
 

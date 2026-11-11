@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CloudRain, Thermometer, Wind, Droplets } from "lucide-react"
-import { getWeather } from "@/lib/api"
+import { getWeather, WeatherPoint } from "@/lib/api"
 
 interface WeatherRadarProps {
     year?: number
@@ -11,21 +11,35 @@ interface WeatherRadarProps {
     sessionType?: string
 }
 
+function fmt(val: number | null | undefined, decimals = 1): string {
+    return typeof val === "number" && Number.isFinite(val) ? val.toFixed(decimals) : "--"
+}
+
 export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "Race" }: WeatherRadarProps) {
-    const [weather, setWeather] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+    const queryKey = `${year}|${location}|${sessionType}`
+    const [weather, setWeather] = useState<WeatherPoint | null>(null)
+    const [loadedKey, setLoadedKey] = useState<string>("")
+    const loading = loadedKey !== queryKey
 
     useEffect(() => {
+        let active = true
         getWeather(year, location, sessionType)
             .then((data) => {
+                if (!active) return
                 if (data.weather && data.weather.length > 0) {
-                    // Get the latest weather data point
                     setWeather(data.weather[data.weather.length - 1])
+                } else {
+                    setWeather(null)
                 }
             })
-            .catch(console.error)
-            .finally(() => setLoading(false))
-    }, [year, location, sessionType])
+            .catch(() => {
+                if (active) setWeather(null)
+            })
+            .finally(() => {
+                if (active) setLoadedKey(queryKey)
+            })
+        return () => { active = false }
+    }, [year, location, sessionType, queryKey])
 
     if (loading) {
         return (
@@ -49,6 +63,8 @@ export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "
         )
     }
 
+    const humidityVal = typeof weather.humidity === "number" ? Math.min(100, Math.max(0, weather.humidity)) : 0
+
     return (
         <Card className="bg-zinc-900/50 border-zinc-800 h-full">
             <CardHeader className="py-3 px-4 border-b border-zinc-800">
@@ -61,17 +77,17 @@ export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "
                 <div className="grid grid-cols-3 gap-2 mb-4">
                     <div className="text-center p-2 bg-zinc-950/50 rounded border border-zinc-800">
                         <Thermometer className="w-4 h-4 text-red-500 mx-auto mb-1" />
-                        <div className="text-lg font-bold">{weather.track_temp.toFixed(1)}°C</div>
+                        <div className="text-lg font-bold">{fmt(weather.track_temp)}°C</div>
                         <div className="text-[10px] text-zinc-500 uppercase">Track</div>
                     </div>
                     <div className="text-center p-2 bg-zinc-950/50 rounded border border-zinc-800">
                         <Thermometer className="w-4 h-4 text-orange-500 mx-auto mb-1" />
-                        <div className="text-lg font-bold">{weather.air_temp.toFixed(1)}°C</div>
+                        <div className="text-lg font-bold">{fmt(weather.air_temp)}°C</div>
                         <div className="text-[10px] text-zinc-500 uppercase">Air</div>
                     </div>
                     <div className="text-center p-2 bg-zinc-950/50 rounded border border-zinc-800">
                         <Wind className="w-4 h-4 text-zinc-400 mx-auto mb-1" />
-                        <div className="text-lg font-bold">{weather.wind_speed.toFixed(1)}<span className="text-[10px]">km/h</span></div>
+                        <div className="text-lg font-bold">{fmt(weather.wind_speed)}<span className="text-[10px]">m/s</span></div>
                         <div className="text-[10px] text-zinc-500 uppercase">Wind</div>
                     </div>
                 </div>
@@ -79,13 +95,13 @@ export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "
                 <div className="space-y-2">
                     <div className="flex justify-between text-xs">
                         <span className="text-zinc-400 flex items-center gap-1"><Droplets className="w-3 h-3" /> Humidity</span>
-                        <span className="font-bold text-blue-400">{weather.humidity.toFixed(1)}%</span>
+                        <span className="font-bold text-blue-400">{fmt(weather.humidity)}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500" style={{ width: `${weather.humidity}%` }} />
+                        <div className="h-full bg-blue-500" style={{ width: `${humidityVal}%` }} />
                     </div>
                     <div className="flex justify-between text-[10px] text-zinc-600 font-mono pt-1">
-                        <span>Pressure: {weather.pressure.toFixed(0)} mbar</span>
+                        <span>Pressure: {fmt(weather.pressure, 0)} mbar</span>
                         <span>Rain: {weather.rainfall ? 'YES' : 'NO'}</span>
                     </div>
                 </div>

@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env*
+.venv
+venv
+env
+node_modules
+.next
+backend/.venv
+backend/cache
+backend/__pycache__
+__pycache__
+*.py[cod]
+*.log
+*.tsbuildinfo
+.DS_Store
+

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CircleDot } from "lucide-react"
-import { getTyreStints } from "@/lib/api"
+import { getTyreStints, DriverStints } from "@/lib/api"
 
 interface TyreStrategyProps {
     year?: number
@@ -11,17 +11,36 @@ interface TyreStrategyProps {
     sessionType?: string
 }
 
-export function TyreStrategy({ year = 2024, location = "Lusail", sessionType = "Race" }: TyreStrategyProps) {
-    const [strategies, setStrategies] = useState<any[]>([])
+const COMPOUND_COLORS: Record<string, string> = {
+    SOFT: "bg-red-600 text-white",
+    MEDIUM: "bg-yellow-500 text-black",
+    HARD: "bg-white text-black",
+    INTERMEDIATE: "bg-green-500 text-black",
+    WET: "bg-blue-600 text-white",
+}
+
+export function TyreStrategy({
+    year = new Date().getFullYear(),
+    location = "Lusail",
+    sessionType = "Race",
+}: TyreStrategyProps) {
+    const [strategies, setStrategies] = useState<DriverStints[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        let active = true
+        setLoading(true)
         getTyreStints(year, location, sessionType)
             .then((data) => {
-                setStrategies(data.stints || [])
+                if (active) setStrategies(data.stints || [])
             })
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false))
+            .catch(() => {
+                if (active) setStrategies([])
+            })
+            .finally(() => {
+                if (active) setLoading(false)
+            })
+        return () => { active = false }
     }, [year, location, sessionType])
 
     if (loading) {
@@ -37,8 +56,11 @@ export function TyreStrategy({ year = 2024, location = "Lusail", sessionType = "
         )
     }
 
-    // Limit to top 5 drivers to avoid clutter
     const displayStrategies = strategies.slice(0, 5)
+    const maxRaceLaps = Math.max(
+        1,
+        ...strategies.map((s) => s.race_laps || s.total_laps || 0)
+    )
 
     return (
         <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
@@ -49,52 +71,67 @@ export function TyreStrategy({ year = 2024, location = "Lusail", sessionType = "
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-                <div className="space-y-8">
-                    {displayStrategies.map((strat, idx) => (
-                        <div key={idx}>
-                            <div className="flex justify-between items-center mb-2">
-                                <div className="font-bold text-lg">{strat.driver}</div>
-                                <div className="text-xs text-zinc-500 uppercase font-mono">{strat.stints.length - 1} Stops</div>
-                            </div>
-                            <div className="flex h-8 rounded-full overflow-hidden bg-zinc-800">
-                                {strat.stints.map((stint: any, sIdx: number) => {
-                                    let color = "bg-white"
-                                    if (stint.compound === "SOFT") color = "bg-red-600"
-                                    if (stint.compound === "MEDIUM") color = "bg-yellow-500"
-                                    if (stint.compound === "HARD") color = "bg-white"
-                                    if (stint.compound === "INTERMEDIATE") color = "bg-green-500"
-                                    if (stint.compound === "WET") color = "bg-blue-600"
-
-                                    return (
-                                        <div
-                                            key={sIdx}
-                                            className={`${color} h-full flex items-center justify-center text-black font-bold text-xs border-r border-black/20 last:border-0`}
-                                            style={{ width: `${(stint.laps / 57) * 100}%` }} // Assuming 57 laps for now, ideally dynamic
-                                            title={`${stint.compound} (${stint.laps} Laps)`}
-                                        >
-                                            {stint.laps > 5 ? `${stint.laps}L` : ''}
+                {displayStrategies.length === 0 ? (
+                    <div className="h-[180px] flex items-center justify-center text-sm font-mono text-zinc-500">
+                        No tyre stint data available.
+                    </div>
+                ) : (
+                    <>
+                        <div className="space-y-6">
+                            {displayStrategies.map((strat) => {
+                                const totalBase = Math.max(strat.race_laps || maxRaceLaps, strat.total_laps || 1, 1)
+                                const stops = Math.max(0, (strat.stints?.length || 1) - 1)
+                                return (
+                                    <div key={strat.driver}>
+                                        <div className="flex justify-between items-center mb-1.5">
+                                            <div className="font-bold text-base flex items-center gap-2">
+                                                <span
+                                                    className="inline-block w-2 h-2 rounded-full"
+                                                    style={{ backgroundColor: `#${(strat.color || "71717A").replace(/^#/, "")}` }}
+                                                />
+                                                {strat.driver}
+                                            </div>
+                                            <div className="text-xs text-zinc-500 uppercase font-mono">
+                                                {stops} {stops === 1 ? "Stop" : "Stops"}
+                                            </div>
                                         </div>
-                                    )
-                                })}
+                                        <div className="flex h-7 rounded-full overflow-hidden bg-zinc-800">
+                                            {strat.stints.map((stint, sIdx) => {
+                                                const color =
+                                                    COMPOUND_COLORS[(stint.compound || "").toUpperCase()] || "bg-zinc-400 text-black"
+                                                return (
+                                                    <div
+                                                        key={`${stint.stint}-${sIdx}`}
+                                                        className={`${color} h-full flex items-center justify-center font-bold text-xs border-r border-black/20 last:border-0`}
+                                                        style={{ width: `${(stint.laps / totalBase) * 100}%` }}
+                                                        title={`${stint.compound} (${stint.laps} Laps)`}
+                                                    >
+                                                        {stint.laps > 4 ? `${stint.laps}L` : ""}
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+
+                        <div className="mt-7 grid grid-cols-3 gap-2 text-center">
+                            <div className="flex items-center gap-2 justify-center">
+                                <div className="w-3 h-3 rounded-full bg-red-600" />
+                                <span className="text-xs uppercase font-mono">Soft</span>
+                            </div>
+                            <div className="flex items-center gap-2 justify-center">
+                                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                <span className="text-xs uppercase font-mono">Medium</span>
+                            </div>
+                            <div className="flex items-center gap-2 justify-center">
+                                <div className="w-3 h-3 rounded-full bg-white" />
+                                <span className="text-xs uppercase font-mono">Hard</span>
                             </div>
                         </div>
-                    ))}
-                </div>
-
-                <div className="mt-8 grid grid-cols-3 gap-2 text-center">
-                    <div className="flex items-center gap-2 justify-center">
-                        <div className="w-3 h-3 rounded-full bg-red-600" />
-                        <span className="text-xs uppercase font-mono">Soft</span>
-                    </div>
-                    <div className="flex items-center gap-2 justify-center">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                        <span className="text-xs uppercase font-mono">Medium</span>
-                    </div>
-                    <div className="flex items-center gap-2 justify-center">
-                        <div className="w-3 h-3 rounded-full bg-white" />
-                        <span className="text-xs uppercase font-mono">Hard</span>
-                    </div>
-                </div>
+                    </>
+                )}
             </CardContent>
         </Card>
     )

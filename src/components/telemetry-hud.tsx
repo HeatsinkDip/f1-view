@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TelemetryPoint } from "@/lib/api"
-import { useEffect, useState } from "react"
 
 interface TelemetryHUDProps {
     data?: TelemetryPoint;

@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src",
     "deploy:vercel": "vercel --prod",
     "docker:build": "docker build -t f1-view-frontend .",
     "docker:run": "docker run -p 3000:3000 f1-view-frontend"

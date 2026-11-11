@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useMemo } from "react"
 import { TrackPoint } from "@/lib/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, Zap } from "lucide-react"
+import { Activity } from "lucide-react"
 
 interface TrackMapProps {
     data: TrackPoint[];
@@ -15,25 +15,28 @@ interface TrackMapProps {
 }
 
 export function TrackMap({ data, circuitName, currentPosition, comparisonPosition, className, showHeatmap = true }: TrackMapProps) {
-    const [viewBox, setViewBox] = useState("0 0 100 100")
+    const { viewBox, unitScale } = useMemo(() => {
+        if (!data || data.length === 0) {
+            return { viewBox: "0 0 100 100", unitScale: 1 };
+        }
+        const xs = data.map(p => p.x);
+        const ys = data.map(p => p.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
 
-    useEffect(() => {
-        if (!data || data.length === 0) return
+        const width = maxX - minX || 100;
+        const height = maxY - minY || 100;
+        const padding = Math.max(width, height) * 0.1;
+        const vbWidth = width + padding * 2;
+        const vbHeight = height + padding * 2;
 
-        // Calculate bounding box
-        const xs = data.map(p => p.x)
-        const ys = data.map(p => p.y)
-        const minX = Math.min(...xs)
-        const maxX = Math.max(...xs)
-        const minY = Math.min(...ys)
-        const maxY = Math.max(...ys)
-
-        const width = maxX - minX
-        const height = maxY - minY
-        const padding = Math.max(width, height) * 0.1 // Balanced padding
-
-        setViewBox(`${minX - padding} ${minY - padding} ${width + padding * 2} ${height + padding * 2}`)
-    }, [data])
+        return {
+            viewBox: `${minX - padding} ${minY - padding} ${vbWidth} ${vbHeight}`,
+            unitScale: vbWidth / 100 || 1,
+        };
+    }, [data]);
 
     const getSpeedColor = (speed: number) => {
         // Neon Gradient: 
@@ -87,7 +90,7 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                             d={data.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
                             fill="none"
                             stroke="#18181b"
-                            strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100) * 6}
+                            strokeWidth={unitScale * 6}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                         />
@@ -97,10 +100,10 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                             <line
                                 x1={data[0].x}
                                 y1={data[0].y}
-                                x2={data[0].x + (parseInt(viewBox.split(' ')[2]) / 100) * 6}
+                                x2={data[0].x + unitScale * 6}
                                 y2={data[0].y}
                                 stroke="white"
-                                strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100) * 2}
+                                strokeWidth={unitScale * 2}
                                 strokeDasharray="4 4"
                                 className="opacity-50"
                             />
@@ -120,7 +123,7 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                                         x2={p.x}
                                         y2={p.y}
                                         stroke={color}
-                                        strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100) * 3}
+                                        strokeWidth={unitScale * 3}
                                         strokeLinecap="round"
                                         className="transition-colors duration-300"
                                         style={{ filter: 'drop-shadow(0 0 4px ' + color + ')' }}
@@ -132,7 +135,7 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                                 d={data.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
                                 fill="none"
                                 stroke="url(#trackGradient)"
-                                strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100) * 3}
+                                strokeWidth={unitScale * 3}
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 filter="url(#glow)"
@@ -141,19 +144,19 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
 
                         {/* Comparison Driver (Ghost Car) */}
                         {comparisonPosition && (
-                            <g style={{ transition: 'all 0.1s linear', transform: `translate(${comparisonPosition.x}px, ${comparisonPosition.y}px)` }}>
+                            <g transform={`translate(${comparisonPosition.x}, ${comparisonPosition.y})`}>
                                 <circle
-                                    r={(parseInt(viewBox.split(' ')[2]) / 100) * 3}
+                                    r={unitScale * 3}
                                     fill="transparent"
                                     stroke="rgba(255, 255, 255, 0.4)"
-                                    strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100)}
-                                    className="animate-ping absolute"
+                                    strokeWidth={unitScale}
+                                    className="animate-pulse"
                                 />
                                 <circle
-                                    r={(parseInt(viewBox.split(' ')[2]) / 100) * 3}
+                                    r={unitScale * 3}
                                     fill="#71717a"
                                     stroke="white"
-                                    strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100) * 0.5}
+                                    strokeWidth={unitScale * 0.5}
                                     className="drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                                 />
                             </g>
@@ -161,19 +164,19 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
 
                         {/* Main Driver (Active Car) */}
                         {currentPosition && (
-                            <g style={{ transition: 'all 0.05s linear', transform: `translate(${currentPosition.x}px, ${currentPosition.y}px)` }}>
+                            <g transform={`translate(${currentPosition.x}, ${currentPosition.y})`}>
                                 {/* Glow Effect */}
                                 <circle
-                                    r={(parseInt(viewBox.split(' ')[2]) / 100) * 6}
+                                    r={unitScale * 6}
                                     fill="rgba(239, 68, 68, 0.2)"
                                     className="animate-pulse"
                                 />
                                 {/* Car Dot */}
                                 <circle
-                                    r={(parseInt(viewBox.split(' ')[2]) / 100) * 4}
+                                    r={unitScale * 4}
                                     fill="#ef4444"
                                     stroke="white"
-                                    strokeWidth={(parseInt(viewBox.split(' ')[2]) / 100)}
+                                    strokeWidth={unitScale}
                                     className="drop-shadow-[0_0_15px_rgba(239,68,68,1)]"
                                 />
                             </g>

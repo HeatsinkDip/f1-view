@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts"
 import { Users, Zap, AlertCircle } from "lucide-react"
-import { getSessionDrivers, getDriverTelemetry } from "@/lib/api"
+import { getSessionDrivers, getDriverTelemetry, Driver, TelemetryPoint } from "@/lib/api"
 
 interface DriverComparisonProps {
     year?: number
@@ -13,65 +13,92 @@ interface DriverComparisonProps {
     sessionType?: string
 }
 
-export function DriverComparison({ year = 2025, location = "Lusail", sessionType = "Race" }: DriverComparisonProps) {
-    const [drivers, setDrivers] = useState<any[]>([])
+function findClosestSpeed(points: TelemetryPoint[], distance: number): number | null {
+    if (!points.length) return null
+    let best: TelemetryPoint | null = null
+    let bestDiff = Infinity
+    for (const p of points) {
+        const diff = Math.abs(p.distance - distance)
+        if (diff < bestDiff) {
+            bestDiff = diff
+            best = p
+        }
+    }
+    return best && bestDiff <= 150 ? best.speed : null
+}
+
+export function DriverComparison({
+    year = new Date().getFullYear(),
+    location = "Lusail",
+    sessionType = "Race",
+}: DriverComparisonProps) {
+    const [drivers, setDrivers] = useState<Driver[]>([])
     const [driver1Id, setDriver1Id] = useState<string>("")
     const [driver2Id, setDriver2Id] = useState<string>("")
-    const [telemetryData, setTelemetryData] = useState<any[]>([])
+    const [telemetryData, setTelemetryData] = useState<{ distance: number; speed1: number; speed2: number | null }[]>([])
     const [loading, setLoading] = useState(true)
     const [chartLoading, setChartLoading] = useState(false)
 
-    // Fetch drivers list
     useEffect(() => {
+        let active = true
+        setLoading(true)
+        setDrivers([])
+        setDriver1Id("")
+        setDriver2Id("")
+        setTelemetryData([])
+
         getSessionDrivers(year, location, sessionType)
             .then((driversList) => {
+                if (!active) return
                 setDrivers(driversList)
                 if (driversList.length >= 2) {
-                    // Default to top 2 drivers
                     setDriver1Id(driversList[0].id)
                     setDriver2Id(driversList[1].id)
+                } else if (driversList.length === 1) {
+                    setDriver1Id(driversList[0].id)
                 }
             })
-            .catch(console.error)
-            .finally(() => setLoading(false))
+            .catch(() => {
+                if (active) setDrivers([])
+            })
+            .finally(() => {
+                if (active) setLoading(false)
+            })
+        return () => { active = false }
     }, [year, location, sessionType])
 
-    // Fetch telemetry when drivers change
     useEffect(() => {
         if (!driver1Id || !driver2Id) return
-
+        let active = true
         setChartLoading(true)
+
         Promise.all([
-            getDriverTelemetry(year, location, sessionType, driver1Id),
-            getDriverTelemetry(year, location, sessionType, driver2Id)
+            getDriverTelemetry(year, location, sessionType, driver1Id, 180),
+            getDriverTelemetry(year, location, sessionType, driver2Id, 180),
         ])
             .then(([t1, t2]) => {
-                // Merge telemetry data based on distance or time
-                // For simplicity, we'll assume similar sampling and just map by index or distance
-                // Real implementation would need interpolation for precise distance matching
-
-                // Let's use t1 as base and find closest points in t2
-                const merged = []
+                if (!active) return
                 const data1 = t1.telemetry || []
                 const data2 = t2.telemetry || []
-
-                // Simple merge by index for now (assuming same downsampling)
-                const minLen = Math.min(data1.length, data2.length)
-                for (let i = 0; i < minLen; i++) {
-                    merged.push({
-                        distance: data1[i].distance,
-                        speed1: data1[i].speed,
-                        speed2: data2[i].speed,
-                    })
-                }
+                const merged = data1.map((pt) => ({
+                    distance: pt.distance,
+                    speed1: pt.speed,
+                    speed2: findClosestSpeed(data2, pt.distance),
+                }))
                 setTelemetryData(merged)
             })
-            .catch(console.error)
-            .finally(() => setChartLoading(false))
+            .catch(() => {
+                if (active) setTelemetryData([])
+            })
+            .finally(() => {
+                if (active) setChartLoading(false)
+            })
+
+        return () => { active = false }
     }, [driver1Id, driver2Id, year, location, sessionType])
 
-    const d1 = drivers.find(d => d.id === driver1Id)
-    const d2 = drivers.find(d => d.id === driver2Id)
+    const d1 = drivers.find((d) => d.id === driver1Id)
+    const d2 = drivers.find((d) => d.id === driver2Id)
 
     if (loading) {
         return (
@@ -100,10 +127,10 @@ export function DriverComparison({ year = 2025, location = "Lusail", sessionType
                         <label className="text-xs text-zinc-500 uppercase font-mono">Driver 1</label>
                         <Select value={driver1Id} onValueChange={setDriver1Id}>
                             <SelectTrigger className="bg-zinc-950 border-zinc-800">
-                                <SelectValue />
+                                <SelectValue placeholder="Select driver" />
                             </SelectTrigger>
                             <SelectContent>
-                                {drivers.map(d => (
+                                {drivers.map((d) => (
                                     <SelectItem key={d.id} value={d.id} disabled={d.id === driver2Id}>
                                         {d.code} - {d.name}
                                     </SelectItem>
@@ -111,8 +138,11 @@ export function DriverComparison({ year = 2025, location = "Lusail", sessionType
                             </SelectContent>
                         </Select>
                         <div className="flex items-center gap-2 mt-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d1?.color ? `#${d1.color}` : '#fff' }} />
-                            <span className="text-sm font-bold text-zinc-300">{d1?.team}</span>
+                            <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: d1?.color ? `#${d1.color.replace(/^#/, "")}` : "#fff" }}
+                            />
+                            <span className="text-sm font-bold text-zinc-300">{d1?.team || "--"}</span>
                         </div>
                     </div>
 
@@ -120,10 +150,10 @@ export function DriverComparison({ year = 2025, location = "Lusail", sessionType
                         <label className="text-xs text-zinc-500 uppercase font-mono">Driver 2</label>
                         <Select value={driver2Id} onValueChange={setDriver2Id}>
                             <SelectTrigger className="bg-zinc-950 border-zinc-800">
-                                <SelectValue />
+                                <SelectValue placeholder="Select driver" />
                             </SelectTrigger>
                             <SelectContent>
-                                {drivers.map(d => (
+                                {drivers.map((d) => (
                                     <SelectItem key={d.id} value={d.id} disabled={d.id === driver1Id}>
                                         {d.code} - {d.name}
                                     </SelectItem>
@@ -131,8 +161,11 @@ export function DriverComparison({ year = 2025, location = "Lusail", sessionType
                             </SelectContent>
                         </Select>
                         <div className="flex items-center gap-2 mt-2">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d2?.color ? `#${d2.color}` : '#fff' }} />
-                            <span className="text-sm font-bold text-zinc-300">{d2?.team}</span>
+                            <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: d2?.color ? `#${d2.color.replace(/^#/, "")}` : "#fff" }}
+                            />
+                            <span className="text-sm font-bold text-zinc-300">{d2?.team || "--"}</span>
                         </div>
                     </div>
                 </div>
@@ -163,22 +196,22 @@ export function DriverComparison({ year = 2025, location = "Lusail", sessionType
                                 />
                                 <YAxis
                                     stroke="#666"
-                                    domain={['auto', 'auto']}
+                                    domain={["auto", "auto"]}
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                 />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#111', borderColor: '#333', color: '#fff' }}
-                                    itemStyle={{ color: '#fff' }}
-                                    labelStyle={{ color: '#888' }}
+                                    contentStyle={{ backgroundColor: "#111", borderColor: "#333", color: "#fff" }}
+                                    itemStyle={{ color: "#fff" }}
+                                    labelStyle={{ color: "#888" }}
                                 />
                                 <Legend />
                                 <Line
                                     type="monotone"
                                     dataKey="speed1"
                                     name={d1?.code || "Driver 1"}
-                                    stroke={d1?.color ? `#${d1.color}` : "#3b82f6"}
+                                    stroke={d1?.color ? `#${d1.color.replace(/^#/, "")}` : "#3b82f6"}
                                     strokeWidth={2}
                                     dot={false}
                                 />
@@ -186,7 +219,7 @@ export function DriverComparison({ year = 2025, location = "Lusail", sessionType
                                     type="monotone"
                                     dataKey="speed2"
                                     name={d2?.code || "Driver 2"}
-                                    stroke={d2?.color ? `#${d2.color}` : "#ef4444"}
+                                    stroke={d2?.color ? `#${d2.color.replace(/^#/, "")}` : "#ef4444"}
                                     strokeWidth={2}
                                     dot={false}
                                     strokeDasharray="5 5"
