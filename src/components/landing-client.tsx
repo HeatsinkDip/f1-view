@@ -458,7 +458,7 @@ export function LandingClient({
               Terms
             </Link>
             <Link
-              href="https://github.com/HeatsinkDip/f1-view/issues"
+              href="https://dipkundu.web.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors"

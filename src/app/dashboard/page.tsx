@@ -28,23 +28,23 @@ export default async function DashboardPage() {
   const events = initialSchedule?.events || [];
   const { lastCompletedRace } = selectRaceScheduleContext(events);
 
-  let initialWinnerDriver = null;
-  let initialWinnerKey: string | null = null;
-  if (lastCompletedRace) {
-    const drivers = await getServerSessionDrivers(
-      initialYear,
-      lastCompletedRace.Location,
-      "Race",
-      revalidate
-    );
-    if (drivers && drivers.length > 0) {
-      initialWinnerDriver = drivers[0];
-      initialWinnerKey = `winner:${initialYear}:${lastCompletedRace.Location}`;
+        let initialWinnerDriver = null;
+        let initialWinnerKey: string | null = null;
+        if (lastCompletedRace) {
+          const drivers = await getServerSessionDrivers(
+            initialYear,
+            lastCompletedRace.Location,
+            "Race",
+            revalidate
+          );
+          if (drivers && drivers.length > 0) {
+            initialWinnerDriver = drivers[0];
+            initialWinnerKey = `winner:${initialYear}:${lastCompletedRace.Location}`;
+          }
     }
-  }
 
-  return (
-    <>
+    return (
+      <>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -63,4 +63,4 @@ export default async function DashboardPage() {
       />
     </>
   );
-}
+  }
