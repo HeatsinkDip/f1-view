@@ -13,9 +13,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const googleVerificationToken = (
+  process.env.GOOGLE_SITE_VERIFICATION || "ZqAYFt_6FXSyUzmfSzoraYQRq6qqpdHIBliIjxW8dSU"
+)
+  .trim()
+  .replace(/^google-site-verification=/i, "");
+
 export const metadata: Metadata = {
   title: "F1 View - Formula 1 Telemetry & Race Analytics",
   description: "F1 View is a Formula 1 Telemetry & Race Analytics platform.",
+  verification: {
+    google: googleVerificationToken,
+  },
 };
 
 export const viewport: Viewport = {
