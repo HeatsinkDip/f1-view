@@ -64,9 +64,9 @@ export function LapComparison({
 
     if (loading) {
         return (
-            <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full animate-pulse">
-                <CardHeader className="border-b border-zinc-800/50 pb-4">
-                    <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg text-zinc-500">
+            <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full animate-pulse">
+                <CardHeader className="border-b border-border/60 pb-4">
+                    <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg text-muted-foreground">
                         Loading Laps...
                     </CardTitle>
                 </CardHeader>
@@ -76,16 +76,16 @@ export function LapComparison({
     }
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
-            <CardHeader className="border-b border-zinc-800/50 pb-4">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">
+            <CardHeader className="border-b border-border/60 pb-4">
                 <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
-                    <Timer className="w-5 h-5 text-orange-500" />
+                    <Timer className="w-5 h-5 text-orange-600 dark:text-orange-500" />
                     Lap Comparison (Top 3)
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
                 {data.length === 0 ? (
-                    <div className="h-[250px] flex items-center justify-center text-sm font-mono text-zinc-500">
+                    <div className="h-[250px] flex items-center justify-center text-sm font-mono text-muted-foreground">
                         No representative lap pace data available.
                     </div>
                 ) : (
@@ -94,14 +94,14 @@ export function LapComparison({
                             <LineChart data={data}>
                                 <XAxis
                                     dataKey="lap"
-                                    stroke="#666"
+                                    stroke="var(--muted-foreground)"
                                     tickFormatter={(val) => `L${val}`}
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                 />
                                 <YAxis
-                                    stroke="#666"
+                                    stroke="var(--muted-foreground)"
                                     domain={["auto", "auto"]}
                                     fontSize={12}
                                     tickLine={false}
@@ -109,9 +109,9 @@ export function LapComparison({
                                     hide
                                 />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: "#111", borderColor: "#333", color: "#fff" }}
-                                    itemStyle={{ color: "#fff" }}
-                                    labelStyle={{ color: "#888" }}
+                                    contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", color: "var(--card-foreground)", borderRadius: "0.5rem" }}
+                                    itemStyle={{ color: "var(--card-foreground)" }}
+                                    labelStyle={{ color: "var(--muted-foreground)" }}
                                     formatter={(val: number | string) => [`${val}s`]}
                                     labelFormatter={(lap) => `Lap ${lap}`}
                                 />

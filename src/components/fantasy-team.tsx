@@ -96,18 +96,18 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
     }
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
-            <CardHeader className="border-b border-zinc-800/50 pb-4 flex flex-row items-center justify-between">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">
+            <CardHeader className="border-b border-border/60 pb-4 flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
-                    <Users className="w-5 h-5 text-purple-500" />
+                    <Users className="w-5 h-5 text-purple-600 dark:text-purple-500" />
                     Fantasy Team
                 </CardTitle>
-                <span className="text-xs font-mono text-zinc-400">{totalPoints} PTS</span>
+                <span className="text-xs font-mono text-muted-foreground">{totalPoints} PTS</span>
             </CardHeader>
             <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                    <div className="text-sm text-zinc-400">Budget Remaining</div>
-                    <div className={`text-xl font-bold ${remaining < 0 ? "text-red-500" : "text-green-500"}`}>
+                    <div className="text-sm text-muted-foreground">Budget Remaining</div>
+                    <div className={`text-xl font-bold ${remaining < 0 ? "text-red-600 dark:text-red-500" : "text-emerald-700 dark:text-green-400"}`}>
                         ${remaining.toFixed(1)}M
                     </div>
                 </div>
@@ -124,7 +124,7 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
                                 setSaved(false)
                             }}
                         >
-                            <SelectTrigger className="h-10 bg-zinc-950/60 border-zinc-800 text-xs font-mono">
+                            <SelectTrigger className="h-10 bg-background border-border text-xs font-mono">
                                 <SelectValue placeholder={`Select Driver ${slotIdx + 1}`} />
                             </SelectTrigger>
                             <SelectContent>
@@ -143,7 +143,7 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
                 </div>
 
                 <div className="mt-4">
-                    <div className="text-xs text-zinc-500 uppercase font-mono mb-1.5">Constructor</div>
+                    <div className="text-xs text-muted-foreground uppercase font-mono mb-1.5">Constructor</div>
                     <Select
                         value={selectedConstructor || "empty"}
                         onValueChange={(nextVal) => {
@@ -151,7 +151,7 @@ export function FantasyTeam({ year = new Date().getFullYear() }: FantasyTeamProp
                             setSaved(false)
                         }}
                     >
-                        <SelectTrigger className="h-10 bg-zinc-950/60 border-zinc-800 text-xs font-mono">
+                        <SelectTrigger className="h-10 bg-background border-border text-xs font-mono">
                             <SelectValue placeholder="Select Constructor" />
                         </SelectTrigger>
                         <SelectContent>

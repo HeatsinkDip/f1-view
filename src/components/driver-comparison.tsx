@@ -102,9 +102,9 @@ export function DriverComparison({
 
     if (loading) {
         return (
-            <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full animate-pulse">
-                <CardHeader className="border-b border-zinc-800/50">
-                    <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg text-zinc-500">
+            <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full animate-pulse">
+                <CardHeader className="border-b border-border/60">
+                    <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg text-muted-foreground">
                         Loading Analysis...
                     </CardTitle>
                 </CardHeader>
@@ -114,8 +114,8 @@ export function DriverComparison({
     }
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
-            <CardHeader className="border-b border-zinc-800/50">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">
+            <CardHeader className="border-b border-border/60">
                 <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
                     <Users className="w-5 h-5 text-red-600" />
                     Head-to-Head Analysis
@@ -124,9 +124,9 @@ export function DriverComparison({
             <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <div className="space-y-2">
-                        <label className="text-xs text-zinc-500 uppercase font-mono">Driver 1</label>
+                        <label className="text-xs text-muted-foreground uppercase font-mono">Driver 1</label>
                         <Select value={driver1Id} onValueChange={setDriver1Id}>
-                            <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                            <SelectTrigger className="bg-background border-border">
                                 <SelectValue placeholder="Select driver" />
                             </SelectTrigger>
                             <SelectContent>
@@ -139,17 +139,17 @@ export function DriverComparison({
                         </Select>
                         <div className="flex items-center gap-2 mt-2">
                             <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: d1?.color ? `#${d1.color.replace(/^#/, "")}` : "#fff" }}
+                                className="w-3 h-3 rounded-full border border-border/60"
+                                style={{ backgroundColor: d1?.color ? `#${d1.color.replace(/^#/, "")}` : "#71717A" }}
                             />
-                            <span className="text-sm font-bold text-zinc-300">{d1?.team || "--"}</span>
+                            <span className="text-sm font-bold text-foreground">{d1?.team || "--"}</span>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs text-zinc-500 uppercase font-mono">Driver 2</label>
+                        <label className="text-xs text-muted-foreground uppercase font-mono">Driver 2</label>
                         <Select value={driver2Id} onValueChange={setDriver2Id}>
-                            <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                            <SelectTrigger className="bg-background border-border">
                                 <SelectValue placeholder="Select driver" />
                             </SelectTrigger>
                             <SelectContent>
@@ -162,22 +162,22 @@ export function DriverComparison({
                         </Select>
                         <div className="flex items-center gap-2 mt-2">
                             <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: d2?.color ? `#${d2.color.replace(/^#/, "")}` : "#fff" }}
+                                className="w-3 h-3 rounded-full border border-border/60"
+                                style={{ backgroundColor: d2?.color ? `#${d2.color.replace(/^#/, "")}` : "#71717A" }}
                             />
-                            <span className="text-sm font-bold text-zinc-300">{d2?.team || "--"}</span>
+                            <span className="text-sm font-bold text-foreground">{d2?.team || "--"}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="h-[300px] w-full relative">
-                    <div className="flex items-center gap-2 mb-4 text-sm text-zinc-400 font-mono uppercase">
-                        <Zap className="w-4 h-4 text-yellow-500" />
+                    <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground font-mono uppercase">
+                        <Zap className="w-4 h-4 text-amber-600 dark:text-yellow-500" />
                         Speed Comparison (km/h)
                     </div>
 
                     {chartLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm z-10">
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm z-10">
                             <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                         </div>
                     )}
@@ -185,26 +185,26 @@ export function DriverComparison({
                     {telemetryData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={telemetryData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                                 <XAxis
                                     dataKey="distance"
-                                    stroke="#666"
+                                    stroke="var(--muted-foreground)"
                                     tickFormatter={(val) => `${(val / 1000).toFixed(1)}km`}
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                 />
                                 <YAxis
-                                    stroke="#666"
+                                    stroke="var(--muted-foreground)"
                                     domain={["auto", "auto"]}
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                 />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: "#111", borderColor: "#333", color: "#fff" }}
-                                    itemStyle={{ color: "#fff" }}
-                                    labelStyle={{ color: "#888" }}
+                                    contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", color: "var(--card-foreground)", borderRadius: "0.5rem" }}
+                                    itemStyle={{ color: "var(--card-foreground)" }}
+                                    labelStyle={{ color: "var(--muted-foreground)" }}
                                 />
                                 <Legend />
                                 <Line
@@ -227,7 +227,7 @@ export function DriverComparison({
                             </LineChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-zinc-500">
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                             <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
                             <p>No telemetry data available for comparison</p>
                         </div>

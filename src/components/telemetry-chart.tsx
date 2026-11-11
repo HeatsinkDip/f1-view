@@ -41,7 +41,7 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
 
     if (!data || data.length === 0) {
         return (
-            <div className="h-full w-full flex items-center justify-center text-xs font-mono text-zinc-500 uppercase tracking-wider">
+            <div className="h-full w-full flex items-center justify-center text-xs font-mono text-muted-foreground uppercase tracking-wider">
                 Telemetry unavailable
             </div>
         );
@@ -54,7 +54,7 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
                     data={chartData}
                     margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-800" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                     <XAxis
                         dataKey="distance"
                         hide
@@ -64,8 +64,8 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
                         domain={dataKey === 'gear' ? [0, 8] : ['auto', 'auto']}
                     />
                     <Tooltip
-                        contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
-                        itemStyle={{ color: '#fff' }}
+                        contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--card-foreground)', borderRadius: '0.5rem' }}
+                        itemStyle={{ color: 'var(--card-foreground)' }}
                         formatter={(value: number | string) => [`${value}${unit}`]}
                         labelFormatter={() => ''}
                     />
@@ -81,7 +81,7 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
                         <Line
                             type="monotone"
                             dataKey="val2"
-                            stroke="white"
+                            stroke="var(--foreground)"
                             strokeOpacity={0.5}
                             strokeDasharray="4 4"
                             dot={false}
@@ -90,7 +90,7 @@ export function TelemetryChart({ data, comparisonData, dataKey, color = "hsl(var
                         />
                     )}
                     {activeIndex !== undefined && chartData[activeIndex] && (
-                        <ReferenceLine x={chartData[activeIndex].distance} stroke="white" />
+                        <ReferenceLine x={chartData[activeIndex].distance} stroke="var(--foreground)" />
                     )}
                 </LineChart>
             </ResponsiveContainer>

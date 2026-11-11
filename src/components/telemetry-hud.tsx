@@ -27,9 +27,9 @@ export function TelemetryHUD({ data }: TelemetryHUDProps) {
     }
 
     return (
-        <Card className="w-full bg-zinc-950 border-zinc-800 text-white shadow-2xl overflow-hidden">
-            <CardHeader className="pb-2 border-b border-zinc-800 bg-zinc-900/50">
-                <CardTitle className="text-xs font-mono uppercase tracking-widest text-zinc-400">Telemetry HUD</CardTitle>
+        <Card className="w-full bg-card/95 backdrop-blur-md border-border text-foreground shadow-xl dark:shadow-2xl overflow-hidden">
+            <CardHeader className="pb-2 border-b border-border bg-muted/60 dark:bg-zinc-900/50">
+                <CardTitle className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Telemetry HUD</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
                 <div className="grid grid-cols-3 gap-4">
@@ -37,52 +37,52 @@ export function TelemetryHUD({ data }: TelemetryHUDProps) {
                     <div className="flex justify-center gap-2 h-32">
                         {/* Brake */}
                         <div className="flex flex-col items-center gap-1 w-8">
-                            <div className="relative w-full h-full bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800">
+                            <div className="relative w-full h-full bg-muted rounded-sm overflow-hidden border border-border">
                                 <div
                                     className="absolute bottom-0 left-0 w-full bg-red-600 transition-all duration-75 ease-out"
                                     style={{ height: `${brake}%` }}
                                 />
                             </div>
-                            <span className="text-[10px] font-mono text-zinc-500 uppercase">Brk</span>
+                            <span className="text-[10px] font-mono text-muted-foreground uppercase">Brk</span>
                         </div>
                         {/* Throttle */}
                         <div className="flex flex-col items-center gap-1 w-8">
-                            <div className="relative w-full h-full bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800">
+                            <div className="relative w-full h-full bg-muted rounded-sm overflow-hidden border border-border">
                                 <div
                                     className="absolute bottom-0 left-0 w-full bg-green-500 transition-all duration-75 ease-out"
                                     style={{ height: `${throttle}%` }}
                                 />
                             </div>
-                            <span className="text-[10px] font-mono text-zinc-500 uppercase">Thr</span>
+                            <span className="text-[10px] font-mono text-muted-foreground uppercase">Thr</span>
                         </div>
                     </div>
 
                     {/* Center: Gear & Speed */}
                     <div className="flex flex-col items-center justify-center">
-                        <div className="relative flex items-center justify-center w-24 h-24 bg-zinc-900 rounded-full border-4 border-zinc-800 shadow-inner">
-                            <span className="text-6xl font-black tracking-tighter text-white">
+                        <div className="relative flex items-center justify-center w-24 h-24 bg-muted/80 dark:bg-zinc-900 rounded-full border-4 border-border shadow-inner">
+                            <span className="text-6xl font-black tracking-tighter text-foreground">
                                 {getGearDisplay(gear)}
                             </span>
-                            <div className="absolute -bottom-2 px-2 py-0.5 bg-zinc-950 border border-zinc-800 rounded text-[10px] font-mono text-zinc-400">
+                            <div className="absolute -bottom-2 px-2 py-0.5 bg-card border border-border rounded text-[10px] font-mono text-muted-foreground">
                                 GEAR
                             </div>
                         </div>
                         <div className="mt-2 text-center">
-                            <div className="text-4xl font-bold font-mono tabular-nums leading-none">
+                            <div className="text-4xl font-bold font-mono tabular-nums leading-none text-foreground">
                                 {Math.round(speed)}
                             </div>
-                            <div className="text-[10px] font-mono text-zinc-500 uppercase">km/h</div>
+                            <div className="text-[10px] font-mono text-muted-foreground uppercase">km/h</div>
                         </div>
                     </div>
 
                     {/* Right: RPM & DRS (Placeholder) */}
                     <div className="flex flex-col justify-between h-32 py-1">
                         <div className="flex flex-col gap-1 h-full">
-                            <div className="flex justify-between items-end text-[10px] font-mono text-zinc-500 mb-1">
+                            <div className="flex justify-between items-end text-[10px] font-mono text-muted-foreground mb-1">
                                 <span>RPM</span>
                                 <span>{rpm}</span>
                             </div>
-                            <div className="w-full flex-1 bg-zinc-900 rounded-sm overflow-hidden border border-zinc-800 relative">
+                            <div className="w-full flex-1 bg-muted rounded-sm overflow-hidden border border-border relative">
                                 {/* RPM Gradient Bar */}
                                 <div
                                     className="absolute bottom-0 left-0 w-full transition-all duration-75 ease-out"
@@ -96,7 +96,7 @@ export function TelemetryHUD({ data }: TelemetryHUDProps) {
                                     }}
                                 />
                                 {/* Redline Marker */}
-                                <div className="absolute top-[10%] left-0 w-full h-[1px] bg-white/20" />
+                                <div className="absolute top-[10%] left-0 w-full h-[1px] bg-foreground/25" />
                             </div>
                         </div>
                     </div>

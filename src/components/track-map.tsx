@@ -52,14 +52,14 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
     }
 
     return (
-        <Card className={`w-full h-full ${className} bg-zinc-950 border-zinc-900 shadow-2xl overflow-hidden relative group`}>
+        <Card className={`w-full h-full ${className} bg-card dark:bg-zinc-950 border-border shadow-xl dark:shadow-2xl overflow-hidden relative group`}>
             {/* Background Grid Effect */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)] pointer-events-none" />
 
             <CardHeader className="absolute top-0 left-0 z-10 p-6">
                 <CardTitle className="flex flex-col gap-1">
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em]">Live Telemetry</span>
-                    <span className="text-2xl font-black uppercase italic tracking-tighter text-white flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.2em]">Live Telemetry</span>
+                    <span className="text-2xl font-black uppercase italic tracking-tighter text-foreground flex items-center gap-2">
                         {circuitName}
                         <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
                     </span>
@@ -85,14 +85,15 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                             </linearGradient>
                         </defs>
 
-                        {/* Base Track (Darker, thicker background path) */}
+                        {/* Base Track (Thicker background path) */}
                         <path
                             d={data.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
                             fill="none"
-                            stroke="#18181b"
+                            stroke="currentColor"
                             strokeWidth={unitScale * 6}
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            className="text-zinc-300 dark:text-zinc-900"
                         />
 
                         {/* Start/Finish Line Marker */}
@@ -102,10 +103,10 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                                 y1={data[0].y}
                                 x2={data[0].x + unitScale * 6}
                                 y2={data[0].y}
-                                stroke="white"
+                                stroke="currentColor"
                                 strokeWidth={unitScale * 2}
                                 strokeDasharray="4 4"
-                                className="opacity-50"
+                                className="opacity-70 text-zinc-900 dark:text-white"
                             />
                         )}
 
@@ -148,16 +149,16 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                                 <circle
                                     r={unitScale * 3}
                                     fill="transparent"
-                                    stroke="rgba(255, 255, 255, 0.4)"
+                                    stroke="currentColor"
                                     strokeWidth={unitScale}
-                                    className="animate-pulse"
+                                    className="animate-pulse text-zinc-900/40 dark:text-white/40"
                                 />
                                 <circle
                                     r={unitScale * 3}
                                     fill="#71717a"
-                                    stroke="white"
+                                    stroke="currentColor"
                                     strokeWidth={unitScale * 0.5}
-                                    className="drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                    className="text-zinc-900 dark:text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                                 />
                             </g>
                         )}
@@ -175,22 +176,22 @@ export function TrackMap({ data, circuitName, currentPosition, comparisonPositio
                                 <circle
                                     r={unitScale * 4}
                                     fill="#ef4444"
-                                    stroke="white"
+                                    stroke="currentColor"
                                     strokeWidth={unitScale}
-                                    className="drop-shadow-[0_0_15px_rgba(239,68,68,1)]"
+                                    className="text-zinc-900 dark:text-white drop-shadow-[0_0_15px_rgba(239,68,68,1)]"
                                 />
                             </g>
                         )}
                     </svg>
                 ) : (
-                    <div className="flex flex-col items-center gap-4 text-zinc-500">
+                    <div className="flex flex-col items-center gap-4 text-muted-foreground">
                         <Activity className="w-12 h-12 opacity-20" />
                         <div className="text-sm font-mono uppercase tracking-widest">Awaiting Telemetry Data</div>
                     </div>
                 )}
 
                 {/* Map Legend Overlay */}
-                <div className="absolute bottom-6 right-6 bg-zinc-950/90 backdrop-blur border border-zinc-800 p-3 rounded-lg flex flex-col gap-2 text-[10px] font-mono uppercase text-zinc-400">
+                <div className="absolute bottom-6 right-6 bg-card/90 backdrop-blur border border-border p-3 rounded-lg flex flex-col gap-2 text-[10px] font-mono uppercase text-muted-foreground">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
                         <span>Low Speed</span>

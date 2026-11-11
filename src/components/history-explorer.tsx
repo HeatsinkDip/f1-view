@@ -42,8 +42,8 @@ export function HistoryExplorer({ location = "Lusail", availableLocations }: His
 
     if (loading) {
         return (
-            <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full animate-pulse">
-                <CardHeader className="border-b border-zinc-800/50 pb-4">
+            <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full animate-pulse">
+                <CardHeader className="border-b border-border/60 pb-4">
                     <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
                         <History className="w-5 h-5 text-red-600" />
                         Track History
@@ -55,8 +55,8 @@ export function HistoryExplorer({ location = "Lusail", availableLocations }: His
     }
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
-            <CardHeader className="border-b border-zinc-800/50 pb-4">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">
+            <CardHeader className="border-b border-border/60 pb-4">
                 <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
                     <History className="w-5 h-5 text-red-600" />
                     Track History
@@ -65,7 +65,7 @@ export function HistoryExplorer({ location = "Lusail", availableLocations }: His
             <CardContent className="p-6">
                 <div className="mb-5">
                     <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                        <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                        <SelectTrigger className="bg-background border-border">
                             <SelectValue placeholder="Select Circuit" />
                         </SelectTrigger>
                         <SelectContent>
@@ -80,7 +80,7 @@ export function HistoryExplorer({ location = "Lusail", availableLocations }: His
 
                 <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
                     {history.length === 0 ? (
-                        <div className="text-center text-zinc-500 py-6 flex flex-col items-center">
+                        <div className="text-center text-muted-foreground py-6 flex flex-col items-center">
                             <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
                             <p className="text-sm">No historical data available for {selectedLocation}.</p>
                         </div>
@@ -88,16 +88,16 @@ export function HistoryExplorer({ location = "Lusail", availableLocations }: His
                         history.map((win) => (
                             <div
                                 key={`${win.year}-${win.driver}`}
-                                className="flex items-center gap-4 p-3.5 bg-zinc-950/50 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-colors"
+                                className="flex items-center gap-4 p-3.5 bg-muted/50 dark:bg-zinc-950/50 rounded-lg border border-border hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
                             >
-                                <div className="text-xl font-black italic text-zinc-600">{win.year}</div>
+                                <div className="text-xl font-black italic text-muted-foreground/80">{win.year}</div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-bold text-base truncate">{win.driver}</div>
-                                    <div className="text-xs text-zinc-500 uppercase font-mono truncate">{win.team}</div>
+                                    <div className="font-bold text-base text-foreground truncate">{win.driver}</div>
+                                    <div className="text-xs text-muted-foreground uppercase font-mono truncate">{win.team}</div>
                                 </div>
                                 <div className="text-right shrink-0">
-                                    <Trophy className="w-4 h-4 text-yellow-500 ml-auto mb-1" />
-                                    <div className="text-xs font-mono text-zinc-400">{win.time}</div>
+                                    <Trophy className="w-4 h-4 text-amber-600 dark:text-yellow-500 ml-auto mb-1" />
+                                    <div className="text-xs font-mono text-muted-foreground">{win.time}</div>
                                 </div>
                             </div>
                         ))

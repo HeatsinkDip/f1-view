@@ -73,23 +73,23 @@ export function TeamRadio({ year = 2025, location = "Lusail", sessionType = "Rac
     })
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 h-full flex flex-col overflow-hidden group hover:border-zinc-700 transition-colors">
-            <CardHeader className="py-3 px-4 border-b border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm flex flex-row items-center justify-between sticky top-0 z-10">
-                <CardTitle className="text-xs font-mono uppercase text-zinc-400 flex items-center gap-2">
-                    <Radio className={`w-3 h-3 text-red-500 ${playingUrl ? "animate-pulse" : ""}`} />
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border h-full flex flex-col overflow-hidden group hover:border-zinc-400 dark:hover:border-zinc-700 transition-colors">
+            <CardHeader className="py-3 px-4 border-b border-border/60 bg-card/80 dark:bg-zinc-900/50 backdrop-blur-sm flex flex-row items-center justify-between sticky top-0 z-10">
+                <CardTitle className="text-xs font-mono uppercase text-muted-foreground flex items-center gap-2">
+                    <Radio className={`w-3 h-3 text-red-600 dark:text-red-500 ${playingUrl ? "animate-pulse" : ""}`} />
                     Team Radio {clips.length > 0 && `(${clips.length})`}
                 </CardTitle>
                 <div className="flex gap-1">
-                    <span className={`w-0.5 h-2 bg-red-500 ${playingUrl ? "animate-pulse" : "opacity-40"}`} />
-                    <span className={`w-0.5 h-3 bg-red-500 ${playingUrl ? "animate-pulse" : "opacity-40"}`} />
-                    <span className={`w-0.5 h-2 bg-red-500 ${playingUrl ? "animate-pulse" : "opacity-40"}`} />
+                    <span className={`w-0.5 h-2 bg-red-600 dark:bg-red-500 ${playingUrl ? "animate-pulse" : "opacity-40"}`} />
+                    <span className={`w-0.5 h-3 bg-red-600 dark:bg-red-500 ${playingUrl ? "animate-pulse" : "opacity-40"}`} />
+                    <span className={`w-0.5 h-2 bg-red-600 dark:bg-red-500 ${playingUrl ? "animate-pulse" : "opacity-40"}`} />
                 </div>
             </CardHeader>
-            <CardContent className="p-0 flex-1 overflow-y-auto custom-scrollbar bg-zinc-950/30">
+            <CardContent className="p-0 flex-1 overflow-y-auto custom-scrollbar bg-muted/20 dark:bg-zinc-950/30">
                 {loading ? (
-                    <div className="p-4 text-xs font-mono text-zinc-500 animate-pulse">Loading radio channels...</div>
+                    <div className="p-4 text-xs font-mono text-muted-foreground animate-pulse">Loading radio channels...</div>
                 ) : sortedClips.length === 0 ? (
-                    <div className="p-6 text-center text-xs text-zinc-500 flex flex-col items-center gap-2">
+                    <div className="p-6 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
                         <Volume2 className="w-5 h-5 opacity-40" />
                         <span>No FIA team radio clips archived for this session.</span>
                     </div>
@@ -104,8 +104,8 @@ export function TeamRadio({ year = 2025, location = "Lusail", sessionType = "Rac
                                     key={`${clip.recording_url}-${i}`}
                                     type="button"
                                     onClick={() => togglePlay(clip.recording_url)}
-                                    className={`w-full text-left p-3.5 border-b border-zinc-800/30 hover:bg-zinc-900/60 transition-all relative overflow-hidden flex items-center justify-between gap-3 ${
-                                        isPlaying ? "bg-red-500/10" : isSelectedDriver ? "bg-zinc-900/40" : ""
+                                    className={`w-full text-left p-3.5 border-b border-border/50 hover:bg-accent/60 transition-all relative overflow-hidden flex items-center justify-between gap-3 ${
+                                        isPlaying ? "bg-red-500/10" : isSelectedDriver ? "bg-accent/40" : ""
                                     }`}
                                 >
                                     <div
@@ -114,24 +114,24 @@ export function TeamRadio({ year = 2025, location = "Lusail", sessionType = "Rac
                                     />
                                     <div className="pl-2.5 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-black text-sm tracking-tight text-white">
+                                            <span className="font-black text-sm tracking-tight text-foreground">
                                                 {clip.driver_code}
                                             </span>
-                                            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-sm bg-zinc-800 text-zinc-300 truncate max-w-[120px]">
+                                            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-sm bg-muted text-foreground truncate max-w-[120px]">
                                                 {clip.team}
                                             </span>
                                             {isSelectedDriver && (
-                                                <span className="text-[9px] font-mono uppercase text-red-400 border border-red-500/30 px-1 rounded">
+                                                <span className="text-[9px] font-mono uppercase text-red-600 dark:text-red-400 border border-red-500/40 px-1 rounded">
                                                     Active
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="text-[11px] font-mono text-zinc-400 truncate">
+                                        <div className="text-[11px] font-mono text-muted-foreground truncate">
                                             {clip.driver_name} · {clip.time} UTC
                                         </div>
                                     </div>
-                                    <span className="shrink-0 w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
-                                        {isPlaying ? <Pause className="w-3.5 h-3.5 text-red-500" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
+                                    <span className="shrink-0 w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-foreground">
+                                        {isPlaying ? <Pause className="w-3.5 h-3.5 text-red-600 dark:text-red-500" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
                                     </span>
                                 </button>
                             )

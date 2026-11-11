@@ -67,39 +67,39 @@ export function RadioHighlights({
     }
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
-            <CardHeader className="border-b border-zinc-800/50 pb-4 flex flex-row items-center justify-between">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">
+            <CardHeader className="border-b border-border/60 pb-4 flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
-                    <Radio className="w-5 h-5 text-red-500" />
+                    <Radio className="w-5 h-5 text-red-600 dark:text-red-500" />
                     Team Radio
                 </CardTitle>
-                <span className="text-[10px] font-mono uppercase text-zinc-500">{location}</span>
+                <span className="text-[10px] font-mono uppercase text-muted-foreground">{location}</span>
             </CardHeader>
             <CardContent className="p-0 max-h-[340px] overflow-y-auto custom-scrollbar">
                 {loading ? (
-                    <div className="p-6 text-xs font-mono text-zinc-500 animate-pulse">Fetching pit-wall audio...</div>
+                    <div className="p-6 text-xs font-mono text-muted-foreground animate-pulse">Fetching pit-wall audio...</div>
                 ) : radios.length === 0 ? (
-                    <div className="p-6 text-center text-zinc-500 text-xs flex flex-col items-center gap-2">
+                    <div className="p-6 text-center text-muted-foreground text-xs flex flex-col items-center gap-2">
                         <Volume2 className="w-6 h-6 opacity-40" />
                         <span>No radio clips archived for {location} {sessionType}.</span>
                     </div>
                 ) : (
-                    <div className="divide-y divide-zinc-800/50">
+                    <div className="divide-y divide-border/60">
                         {radios.slice(0, 6).map((radio, idx) => {
                             const isPlaying = playingUrl === radio.recording_url
                             const colorHex = `#${(radio.color || "FF1801").replace(/^#/, "")}`
                             return (
-                                <div key={`${radio.recording_url}-${idx}`} className="p-4 hover:bg-zinc-800/30 transition-colors">
+                                <div key={`${radio.recording_url}-${idx}`} className="p-4 hover:bg-accent/50 transition-colors">
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2">
                                             <span
-                                                className="w-2 h-2 rounded-full shrink-0"
+                                                className="w-2 h-2 rounded-full shrink-0 border border-border/50"
                                                 style={{ backgroundColor: colorHex }}
                                             />
-                                            <div className="font-bold text-sm">{radio.driver_name || radio.driver_code}</div>
-                                            <div className="text-xs text-zinc-500 uppercase font-mono">{radio.team}</div>
+                                            <div className="font-bold text-sm text-foreground">{radio.driver_name || radio.driver_code}</div>
+                                            <div className="text-xs text-muted-foreground uppercase font-mono">{radio.team}</div>
                                         </div>
-                                        <div className="text-xs font-mono text-zinc-500">{radio.time} UTC</div>
+                                        <div className="text-xs font-mono text-muted-foreground">{radio.time} UTC</div>
                                     </div>
                                     <Button
                                         size="sm"
@@ -107,8 +107,8 @@ export function RadioHighlights({
                                         onClick={() => togglePlay(radio.recording_url)}
                                         className={`w-full text-xs h-8 ${
                                             isPlaying
-                                                ? "bg-red-600/20 text-red-400 hover:bg-red-600/30"
-                                                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                                ? "bg-red-600/15 text-red-600 dark:text-red-400 hover:bg-red-600/25"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-accent"
                                         }`}
                                     >
                                         {isPlaying ? (

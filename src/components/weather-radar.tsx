@@ -43,9 +43,9 @@ export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "
 
     if (loading) {
         return (
-            <Card className="bg-zinc-900/50 border-zinc-800 animate-pulse h-full">
-                <CardHeader className="py-3 px-4 border-b border-zinc-800">
-                    <CardTitle className="text-xs font-mono uppercase text-zinc-400">Loading Weather...</CardTitle>
+            <Card className="bg-card/80 dark:bg-zinc-900/50 border-border animate-pulse h-full">
+                <CardHeader className="py-3 px-4 border-b border-border">
+                    <CardTitle className="text-xs font-mono uppercase text-muted-foreground">Loading Weather...</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 h-[150px]" />
             </Card>
@@ -54,11 +54,11 @@ export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "
 
     if (!weather) {
         return (
-            <Card className="bg-zinc-900/50 border-zinc-800 h-full">
-                <CardHeader className="py-3 px-4 border-b border-zinc-800">
-                    <CardTitle className="text-xs font-mono uppercase text-zinc-400">Weather Unavailable</CardTitle>
+            <Card className="bg-card/80 dark:bg-zinc-900/50 border-border h-full">
+                <CardHeader className="py-3 px-4 border-b border-border">
+                    <CardTitle className="text-xs font-mono uppercase text-muted-foreground">Weather Unavailable</CardTitle>
                 </CardHeader>
-                <CardContent className="p-4 text-zinc-500 text-xs">No data for this session.</CardContent>
+                <CardContent className="p-4 text-muted-foreground text-xs">No data for this session.</CardContent>
             </Card>
         )
     }
@@ -66,41 +66,41 @@ export function WeatherRadar({ year = 2025, location = "Lusail", sessionType = "
     const humidityVal = typeof weather.humidity === "number" ? Math.min(100, Math.max(0, weather.humidity)) : 0
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 h-full">
-            <CardHeader className="py-3 px-4 border-b border-zinc-800">
-                <CardTitle className="text-xs font-mono uppercase text-zinc-400 flex items-center gap-2">
-                    <CloudRain className="w-3 h-3 text-blue-500" />
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border h-full">
+            <CardHeader className="py-3 px-4 border-b border-border">
+                <CardTitle className="text-xs font-mono uppercase text-muted-foreground flex items-center gap-2">
+                    <CloudRain className="w-3 h-3 text-blue-600 dark:text-blue-500" />
                     Track Conditions
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
                 <div className="grid grid-cols-3 gap-2 mb-4">
-                    <div className="text-center p-2 bg-zinc-950/50 rounded border border-zinc-800">
-                        <Thermometer className="w-4 h-4 text-red-500 mx-auto mb-1" />
-                        <div className="text-lg font-bold">{fmt(weather.track_temp)}°C</div>
-                        <div className="text-[10px] text-zinc-500 uppercase">Track</div>
+                    <div className="text-center p-2 bg-muted/60 dark:bg-zinc-950/50 rounded border border-border">
+                        <Thermometer className="w-4 h-4 text-red-600 dark:text-red-500 mx-auto mb-1" />
+                        <div className="text-lg font-bold text-foreground">{fmt(weather.track_temp)}°C</div>
+                        <div className="text-[10px] text-muted-foreground uppercase">Track</div>
                     </div>
-                    <div className="text-center p-2 bg-zinc-950/50 rounded border border-zinc-800">
-                        <Thermometer className="w-4 h-4 text-orange-500 mx-auto mb-1" />
-                        <div className="text-lg font-bold">{fmt(weather.air_temp)}°C</div>
-                        <div className="text-[10px] text-zinc-500 uppercase">Air</div>
+                    <div className="text-center p-2 bg-muted/60 dark:bg-zinc-950/50 rounded border border-border">
+                        <Thermometer className="w-4 h-4 text-orange-600 dark:text-orange-500 mx-auto mb-1" />
+                        <div className="text-lg font-bold text-foreground">{fmt(weather.air_temp)}°C</div>
+                        <div className="text-[10px] text-muted-foreground uppercase">Air</div>
                     </div>
-                    <div className="text-center p-2 bg-zinc-950/50 rounded border border-zinc-800">
-                        <Wind className="w-4 h-4 text-zinc-400 mx-auto mb-1" />
-                        <div className="text-lg font-bold">{fmt(weather.wind_speed)}<span className="text-[10px]">m/s</span></div>
-                        <div className="text-[10px] text-zinc-500 uppercase">Wind</div>
+                    <div className="text-center p-2 bg-muted/60 dark:bg-zinc-950/50 rounded border border-border">
+                        <Wind className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+                        <div className="text-lg font-bold text-foreground">{fmt(weather.wind_speed)}<span className="text-[10px]">m/s</span></div>
+                        <div className="text-[10px] text-muted-foreground uppercase">Wind</div>
                     </div>
                 </div>
 
                 <div className="space-y-2">
                     <div className="flex justify-between text-xs">
-                        <span className="text-zinc-400 flex items-center gap-1"><Droplets className="w-3 h-3" /> Humidity</span>
-                        <span className="font-bold text-blue-400">{fmt(weather.humidity)}%</span>
+                        <span className="text-muted-foreground flex items-center gap-1"><Droplets className="w-3 h-3" /> Humidity</span>
+                        <span className="font-bold text-blue-700 dark:text-blue-400">{fmt(weather.humidity)}%</span>
                     </div>
-                    <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500" style={{ width: `${humidityVal}%` }} />
+                    <div className="h-1.5 w-full bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-600 dark:bg-blue-500" style={{ width: `${humidityVal}%` }} />
                     </div>
-                    <div className="flex justify-between text-[10px] text-zinc-600 font-mono pt-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground font-mono pt-1">
                         <span>Pressure: {fmt(weather.pressure, 0)} mbar</span>
                         <span>Rain: {weather.rainfall ? 'YES' : 'NO'}</span>
                     </div>

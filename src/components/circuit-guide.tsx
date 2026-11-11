@@ -44,9 +44,9 @@ export function CircuitGuide({
 
     if (loading) {
         return (
-            <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full animate-pulse">
-                <CardHeader className="border-b border-zinc-800/50 pb-4">
-                    <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg text-zinc-500">
+            <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full animate-pulse">
+                <CardHeader className="border-b border-border/60 pb-4">
+                    <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg text-muted-foreground">
                         Loading Circuit...
                     </CardTitle>
                 </CardHeader>
@@ -99,8 +99,8 @@ export function CircuitGuide({
             : "--"
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full flex flex-col">
-            <CardHeader className="border-b border-zinc-800/50 pb-4">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full flex flex-col">
+            <CardHeader className="border-b border-border/60 pb-4">
                 <div className="flex items-center justify-between gap-2">
                     <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
                         <MapPin className="w-5 h-5 text-red-600" />
@@ -110,7 +110,7 @@ export function CircuitGuide({
                         <Toggle
                             pressed={showSectors}
                             onPressedChange={setShowSectors}
-                            className="data-[state=on]:bg-red-600/20 data-[state=on]:text-red-500 border border-transparent data-[state=on]:border-red-600/50 h-7 px-2"
+                            className="data-[state=on]:bg-red-600/15 data-[state=on]:text-red-600 dark:data-[state=on]:text-red-400 border border-transparent data-[state=on]:border-red-600/40 h-7 px-2"
                         >
                             <Layers className="w-3 h-3 mr-1" />
                             <span className="text-[10px] font-bold">SECTORS</span>
@@ -118,7 +118,7 @@ export function CircuitGuide({
                         <Toggle
                             pressed={showDRS}
                             onPressedChange={setShowDRS}
-                            className="data-[state=on]:bg-green-600/20 data-[state=on]:text-green-500 border border-transparent data-[state=on]:border-green-600/50 h-7 px-2"
+                            className="data-[state=on]:bg-emerald-600/15 data-[state=on]:text-emerald-700 dark:data-[state=on]:text-green-400 border border-transparent data-[state=on]:border-emerald-600/40 h-7 px-2"
                         >
                             <Zap className="w-3 h-3 mr-1" />
                             <span className="text-[10px] font-bold">FAST</span>
@@ -127,37 +127,37 @@ export function CircuitGuide({
                 </div>
             </CardHeader>
             <CardContent className="p-6 flex-1 flex flex-col">
-                <div className="flex-1 min-h-[220px] bg-zinc-950/50 rounded-lg border border-zinc-800 flex items-center justify-center relative overflow-hidden mb-5">
+                <div className="flex-1 min-h-[220px] bg-muted/50 dark:bg-zinc-950/50 rounded-lg border border-border flex items-center justify-center relative overflow-hidden mb-5">
                     {trackData.length > 1 ? (
-                        <svg viewBox="0 0 500 300" className="w-full h-full p-4 filter drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-                            <path d={pathD} fill="none" stroke="#e4e4e7" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="opacity-20" />
+                        <svg viewBox="0 0 500 300" className="w-full h-full p-4 text-zinc-900 dark:text-white filter dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                            <path d={pathD} fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" className="opacity-15" />
 
                             {showSectors ? (
                                 <>
                                     <path d={pathS1} fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d={pathS2} fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d={pathS3} fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d={pathS2} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d={pathS3} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                 </>
                             ) : (
-                                <path d={pathD} fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d={pathD} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                             )}
 
                             {showDRS && points.length > 10 && (
                                 <>
-                                    <circle cx={points[Math.floor(points.length * 0.08)].x} cy={points[Math.floor(points.length * 0.08)].y} r="4" fill="#22c55e" className="animate-pulse" />
-                                    <circle cx={points[Math.floor(points.length * 0.52)].x} cy={points[Math.floor(points.length * 0.52)].y} r="4" fill="#22c55e" className="animate-pulse" />
+                                    <circle cx={points[Math.floor(points.length * 0.08)].x} cy={points[Math.floor(points.length * 0.08)].y} r="4" fill="#16a34a" className="animate-pulse" />
+                                    <circle cx={points[Math.floor(points.length * 0.52)].x} cy={points[Math.floor(points.length * 0.52)].y} r="4" fill="#16a34a" className="animate-pulse" />
                                 </>
                             )}
 
                             {points.length > 0 && (
-                                <circle cx={points[0].x} cy={points[0].y} r="4" fill="#ef4444" stroke="#fff" strokeWidth="1.5" />
+                                <circle cx={points[0].x} cy={points[0].y} r="4" fill="#ef4444" stroke="currentColor" strokeWidth="1.5" />
                             )}
                         </svg>
                     ) : (
-                        <div className="text-zinc-500 text-xs font-mono uppercase">Track layout loading soon</div>
+                        <div className="text-muted-foreground text-xs font-mono uppercase">Track layout loading soon</div>
                     )}
 
-                    <div className="absolute bottom-3 right-3 bg-zinc-900/80 backdrop-blur px-2.5 py-1 rounded border border-zinc-700 text-[10px] font-mono flex items-center gap-1.5">
+                    <div className="absolute bottom-3 right-3 bg-card/90 backdrop-blur px-2.5 py-1 rounded border border-border text-[10px] font-mono text-foreground flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
                         {sessionType.toUpperCase()}
                     </div>
@@ -165,20 +165,20 @@ export function CircuitGuide({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                        <div className="text-xs text-zinc-500 uppercase font-mono">Location</div>
-                        <div className="text-lg font-bold text-white truncate">{circuitInfo?.location || location}</div>
+                        <div className="text-xs text-muted-foreground uppercase font-mono">Location</div>
+                        <div className="text-lg font-bold text-foreground truncate">{circuitInfo?.location || location}</div>
                     </div>
                     <div className="space-y-1">
-                        <div className="text-xs text-zinc-500 uppercase font-mono">Country</div>
-                        <div className="text-lg font-bold text-white truncate">{circuitInfo?.country || "--"}</div>
+                        <div className="text-xs text-muted-foreground uppercase font-mono">Country</div>
+                        <div className="text-lg font-bold text-foreground truncate">{circuitInfo?.country || "--"}</div>
                     </div>
                     <div className="space-y-1">
-                        <div className="text-xs text-zinc-500 uppercase font-mono">Length</div>
-                        <div className="text-lg font-bold text-white">{formattedLength}</div>
+                        <div className="text-xs text-muted-foreground uppercase font-mono">Length</div>
+                        <div className="text-lg font-bold text-foreground">{formattedLength}</div>
                     </div>
                     <div className="space-y-1">
-                        <div className="text-xs text-zinc-500 uppercase font-mono">Corners</div>
-                        <div className="text-lg font-bold text-white">
+                        <div className="text-xs text-muted-foreground uppercase font-mono">Corners</div>
+                        <div className="text-lg font-bold text-foreground">
                             {circuitInfo?.corners_count ? `${circuitInfo.corners_count} Turns` : "--"}
                         </div>
                     </div>

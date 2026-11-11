@@ -18,18 +18,18 @@ export function NewsFeed({ year = new Date().getFullYear(), events = [] }: NewsF
         .slice(0, 4)
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden h-full">
-            <CardHeader className="border-b border-zinc-800/50 pb-4">
+        <Card className="bg-card/80 dark:bg-zinc-900/50 border-border backdrop-blur-sm overflow-hidden h-full">
+            <CardHeader className="border-b border-border/60 pb-4">
                 <CardTitle className="flex items-center gap-2 uppercase tracking-wider text-lg">
-                    <Newspaper className="w-5 h-5 text-zinc-400" />
+                    <Newspaper className="w-5 h-5 text-muted-foreground" />
                     {year} Race Briefing
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 {recentAndUpcoming.length === 0 ? (
-                    <div className="p-6 text-xs text-zinc-500">No events scheduled.</div>
+                    <div className="p-6 text-xs text-muted-foreground">No events scheduled.</div>
                 ) : (
-                    <div className="divide-y divide-zinc-800/50">
+                    <div className="divide-y divide-border/60">
                         {recentAndUpcoming.map((ev) => {
                             const dateStr = ev.Session5DateUtc || ev.Session5Date || ev.EventDate
                             const raceDate = new Date(dateStr)
@@ -38,16 +38,16 @@ export function NewsFeed({ year = new Date().getFullYear(), events = [] }: NewsF
                                 <Link
                                     key={`${ev.RoundNumber}-${ev.Location}`}
                                     href={`/session/${year}/${encodeURIComponent(ev.Location)}/Race`}
-                                    className="block p-4 hover:bg-zinc-800/30 transition-colors group"
+                                    className="block p-4 hover:bg-accent/50 transition-colors group"
                                 >
                                     <div className="flex justify-between items-start gap-2">
-                                        <h4 className="font-bold text-sm group-hover:text-red-500 transition-colors line-clamp-2 mb-1">
+                                        <h4 className="font-bold text-sm text-foreground group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2 mb-1">
                                             R{ev.RoundNumber}: {ev.EventName || ev.OfficialEventName}
                                         </h4>
-                                        <ArrowUpRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-white flex-shrink-0 mt-0.5" />
+                                        <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground flex-shrink-0 mt-0.5" />
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono">
-                                        <span className={isPast ? "text-green-500" : "text-red-400"}>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+                                        <span className={isPast ? "text-emerald-700 dark:text-green-400 font-semibold" : "text-red-600 dark:text-red-400 font-semibold"}>
                                             {isPast ? "REPLAY READY" : "UPCOMING"}
                                         </span>
                                         <span>·</span>
