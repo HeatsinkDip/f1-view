@@ -4,14 +4,17 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Fetch async data keyed by a serialized parameter string without calling setState synchronously inside effects.
+ * When `initialKey` matches `requestKey`, SSR-provided `initialValue` is used immediately without a redundant initial fetch.
  */
 export function useAsyncData<T>(
     requestKey: string | null,
     fetcher: () => Promise<T>,
-    initialValue: T
+    initialValue: T,
+    initialKey: string | null = null
 ): { data: T; loading: boolean; error: string | null } {
     const fetcherRef = useRef(fetcher);
     const initialRef = useRef(initialValue);
+    const hydratedKeyRef = useRef(initialKey);
 
     useEffect(() => {
         fetcherRef.current = fetcher;
@@ -23,13 +26,17 @@ export function useAsyncData<T>(
         data: T;
         error: string | null;
     }>({
-        loadedKey: null,
+        loadedKey: initialKey,
         data: initialValue,
         error: null,
     });
 
     useEffect(() => {
         if (requestKey === null) {
+            return;
+        }
+        if (hydratedKeyRef.current !== null && hydratedKeyRef.current === requestKey) {
+            hydratedKeyRef.current = null;
             return;
         }
         let active = true;
