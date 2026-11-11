@@ -151,79 +151,88 @@
 }
 
 :root {
+  color-scheme: light dark;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #FF1801;
+  --background: #f8fafc;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #e10600;
   /* F1 Red */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: #FF1801;
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: #e4e4e7;
+  --input: #d4d4d8;
+  --ring: #e10600;
+  --chart-1: #e10600;
+  --chart-2: #00a19c;
+  --chart-3: #0600ef;
+  --chart-4: #d97706;
+  --chart-5: #be123c;
+  --sidebar: #f4f4f5;
+  --sidebar-foreground: #09090b;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e4e4e7;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #71717a;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 .dark {
   --background: #101014;
   /* Deep Carbon */
-  --foreground: #F0F0F0;
-  --card: #1A1A20;
+  --foreground: #F4F4F5;
+  --card: #18181F;
   /* Lighter Carbon */
-  --card-foreground: #F0F0F0;
-  --popover: #1A1A20;
-  --popover-foreground: #F0F0F0;
+  --card-foreground: #F4F4F5;
+  --popover: #18181F;
+  --popover-foreground: #F4F4F5;
   --primary: #FF1801;
   /* F1 Red */
   --primary-foreground: #FFFFFF;
-  --secondary: #2A2A35;
-  --secondary-foreground: #F0F0F0;
-  --muted: #2A2A35;
-  --muted-foreground: #A0A0A0;
-  --accent: #FF1801;
-  --accent-foreground: #FFFFFF;
+  --secondary: #27272A;
+  --secondary-foreground: #F4F4F5;
+  --muted: #27272A;
+  --muted-foreground: #A1A1AA;
+  --accent: #27272A;
+  --accent-foreground: #F4F4F5;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: #333333;
-  --input: #333333;
+  --border: #2E2E36;
+  --input: #3F3F46;
   --ring: #FF1801;
   --chart-1: #FF1801;
   --chart-2: #00D2BE;
   /* Mercedes Teal */
-  --chart-3: #0600EF;
+  --chart-3: #3671C6;
   /* Alpine Blue */
   --chart-4: #FF8700;
   /* McLaren Papaya */
   --chart-5: #C92D4B;
   /* Alfa Romeo Red */
   --sidebar: #15151E;
-  --sidebar-foreground: #F0F0F0;
+  --sidebar-foreground: #F4F4F5;
   --sidebar-primary: #FF1801;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #2A2A35;
-  --sidebar-accent-foreground: #F0F0F0;
-  --sidebar-border: #333333;
+  --sidebar-accent: #27272A;
+  --sidebar-accent-foreground: #F4F4F5;
+  --sidebar-border: #2E2E36;
   --sidebar-ring: #FF1801;
 }
 

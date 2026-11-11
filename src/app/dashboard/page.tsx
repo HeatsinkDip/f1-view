@@ -163,8 +163,8 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black" />
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-500/5 via-background to-background dark:from-zinc-900 dark:via-zinc-950 dark:to-black" />
         <div className="relative z-10">
           <F1Loader />
         </div>
@@ -174,15 +174,15 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-6">
-        <div className="text-red-500 font-mono text-lg border border-red-900/50 bg-red-950/20 p-8 rounded-xl backdrop-blur-md max-w-xl text-center space-y-4">
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground p-6">
+        <div className="text-red-700 dark:text-red-400 font-mono text-lg border border-red-500/30 bg-red-500/10 p-8 rounded-xl backdrop-blur-md max-w-xl text-center space-y-4">
           <div>
             <span className="font-bold">BACKEND CONNECTION ERROR:</span> {error}
           </div>
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
-            className="border-red-800 text-red-400 hover:bg-red-950"
+            className="border-red-500/40 text-red-700 dark:text-red-400 hover:bg-red-500/15"
           >
             Retry Connection
           </Button>
@@ -197,18 +197,18 @@ export default function Dashboard() {
   const availableLocations = (schedule?.events || []).map((e) => e.Location)
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans selection:bg-red-600 selection:text-white overflow-x-hidden">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black -z-10" />
-      <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-red-600/10 to-transparent -z-10 pointer-events-none" />
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-red-600 selection:text-white overflow-x-hidden">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-200/40 via-background to-background dark:from-zinc-900 dark:via-zinc-950 dark:to-black -z-10" />
+      <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-red-600/5 dark:from-red-600/10 to-transparent -z-10 pointer-events-none" />
 
       <div className="max-w-[1800px] mx-auto p-6 md:p-8">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/50 pb-6 animate-fade-in">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6 animate-fade-in">
           <div>
             <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter uppercase leading-none">
-              F1 <span className="text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">{raceYear}</span>
+              F1 <span className="text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.35)]">{raceYear}</span>
             </h1>
-            <p className="text-zinc-400 font-mono tracking-[0.2em] uppercase text-sm mt-2 flex items-center gap-2 flex-wrap">
+            <p className="text-muted-foreground font-mono tracking-[0.2em] uppercase text-sm mt-2 flex items-center gap-2 flex-wrap">
               <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
               Official Season Hub · Context: {raceLocation} ({sessionType})
             </p>
@@ -218,10 +218,10 @@ export default function Dashboard() {
               value={String(selectedYear)}
               onValueChange={(val) => setSelectedYear(parseInt(val, 10))}
             >
-              <SelectTrigger className="w-[120px] border-zinc-800 bg-zinc-900/80 font-mono font-bold">
+              <SelectTrigger className="w-[130px] border-border bg-card font-mono font-bold">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+              <SelectContent>
                 {SEASON_OPTIONS.map((yr) => (
                   <SelectItem key={yr} value={String(yr)} className="font-mono">
                     {yr} Season
@@ -234,8 +234,8 @@ export default function Dashboard() {
               type="button"
               variant="outline"
               onClick={() => setShowAuthModal((prev) => !prev)}
-              className={`border-zinc-800 bg-zinc-900/50 text-xs font-mono uppercase ${
-                authStatus?.authenticated ? "text-green-400 border-green-900/60" : "text-zinc-400"
+              className={`border-border bg-card text-xs font-mono uppercase ${
+                authStatus?.authenticated ? "text-emerald-700 dark:text-green-400 border-emerald-600/40 dark:border-green-900/60" : "text-muted-foreground"
               }`}
             >
               {authStatus?.authenticated ? (
@@ -249,7 +249,7 @@ export default function Dashboard() {
               )}
             </Button>
 
-            <Button asChild variant="outline" className="hidden md:flex border-zinc-800 bg-zinc-900/50 hover:bg-white hover:text-black hover:border-white transition-all duration-300 uppercase font-bold tracking-wider backdrop-blur-sm">
+            <Button asChild variant="outline" className="hidden md:flex border-border bg-card hover:bg-foreground hover:text-background transition-all duration-300 uppercase font-bold tracking-wider backdrop-blur-sm">
               <Link href="/">Exit Paddock</Link>
             </Button>
             <ModeToggle />
@@ -258,13 +258,13 @@ export default function Dashboard() {
 
         {/* Optional F1TV Account Modal */}
         {showAuthModal && (
-          <div className="mb-8 p-6 rounded-2xl bg-zinc-900/90 border border-zinc-800 backdrop-blur-md">
+          <div className="mb-8 p-6 rounded-2xl bg-card/95 border border-border backdrop-blur-md shadow-lg dark:shadow-none">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <h2 className="text-sm font-mono uppercase tracking-wider text-white font-bold">
+                <h2 className="text-sm font-mono uppercase tracking-wider text-foreground font-bold">
                   FastF1 Live Timing Data Source (v{authStatus?.fastf1_version || "3.9+"})
                 </h2>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Cached FastF1 sessions and OpenF1/Jolpica telemetry work automatically without login. Sign in with an F1 account only if you want to pull fresh F1TV timing feeds directly into FastF1 cache.
                 </p>
               </div>
@@ -274,8 +274,8 @@ export default function Dashboard() {
             </div>
 
             {authStatus?.authenticated ? (
-              <div className="flex items-center justify-between bg-green-950/20 border border-green-900/50 rounded-xl p-4">
-                <div className="text-xs font-mono text-green-400">
+              <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                <div className="text-xs font-mono text-emerald-700 dark:text-green-400">
                   Signed in to F1 account · FastF1 direct downloads active
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={handleF1Logout} disabled={authSubmitting}>
@@ -290,7 +290,7 @@ export default function Dashboard() {
                   value={f1Email}
                   onChange={(e) => setF1Email(e.target.value)}
                   placeholder="F1 account email"
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white"
+                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
                 />
                 <input
                   type="password"
@@ -298,14 +298,14 @@ export default function Dashboard() {
                   value={f1Password}
                   onChange={(e) => setF1Password(e.target.value)}
                   placeholder="Password"
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white"
+                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
                 />
                 <Button type="submit" disabled={authSubmitting} className="bg-red-600 hover:bg-red-700 text-white font-bold uppercase text-xs px-6">
                   {authSubmitting ? "Signing In..." : "Connect F1TV"}
                 </Button>
               </form>
             )}
-            {authError && <p className="text-xs text-red-400 font-mono mt-3">{authError}</p>}
+            {authError && <p className="text-xs text-red-600 dark:text-red-400 font-mono mt-3">{authError}</p>}
           </div>
         )}
 
@@ -313,24 +313,24 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16">
           {nextRace && (
             <div className={`col-span-1 ${lastCompletedRace ? "lg:col-span-2" : "lg:col-span-3"} relative group animate-slide-up`}>
-              <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 to-blue-600/20 blur-3xl opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
-              <div className="relative bg-zinc-900/80 border border-zinc-800 rounded-3xl overflow-hidden h-full flex flex-col backdrop-blur-md shadow-2xl p-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600/15 to-blue-600/15 dark:from-red-600/20 dark:to-blue-600/20 blur-3xl opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
+              <div className="relative bg-card/90 dark:bg-zinc-900/80 border border-border rounded-3xl overflow-hidden h-full flex flex-col backdrop-blur-md shadow-xl dark:shadow-2xl p-8">
                 <div className="flex items-start justify-between mb-8">
                   <div>
-                    <div className="inline-flex items-center gap-2 text-red-500 font-bold uppercase tracking-widest text-xs mb-2 border border-red-500/30 bg-red-500/10 px-3 py-1 rounded-full w-fit">
-                      <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                    <div className="inline-flex items-center gap-2 text-red-600 dark:text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border border-red-500/30 bg-red-500/10 px-3 py-1 rounded-full w-fit">
+                      <span className="w-1.5 h-1.5 bg-red-600 dark:bg-red-500 rounded-full animate-pulse" />
                       Next Grand Prix · Round {nextRace.RoundNumber}
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black uppercase italic leading-[0.9] text-white mb-1">
+                    <h2 className="text-4xl md:text-5xl font-black uppercase italic leading-[0.9] text-foreground mb-1">
                       {nextRace.Location}
                     </h2>
-                    <h3 className="text-xl md:text-2xl text-zinc-400 uppercase font-medium">
+                    <h3 className="text-xl md:text-2xl text-muted-foreground uppercase font-medium">
                       {nextRace.OfficialEventName}
                     </h3>
                   </div>
                   <div className="text-right hidden md:block">
-                    <div className="text-sm text-zinc-500 font-mono uppercase mb-1">Race Date</div>
-                    <div className="text-xl font-bold text-white">
+                    <div className="text-sm text-muted-foreground font-mono uppercase mb-1">Race Date</div>
+                    <div className="text-xl font-bold text-foreground">
                       {getRaceTimestamp(nextRace).toLocaleDateString(undefined, { month: "long", day: "numeric" })}
                     </div>
                   </div>
@@ -339,7 +339,7 @@ export default function Dashboard() {
                 <div className="mt-auto flex flex-col md:flex-row items-center gap-8">
                   <NextRaceCountdown targetDate={nextRace.Session5DateUtc || nextRace.Session5Date || nextRace.EventDate} />
 
-                  <Button asChild size="lg" className="w-full md:w-auto bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-wider skew-x-[-10deg] ml-auto">
+                  <Button asChild size="lg" className="w-full md:w-auto bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-black uppercase tracking-wider skew-x-[-10deg] ml-auto">
                     <Link href={`/session/${raceYear}/${encodeURIComponent(nextRace.Location)}/Race`} className="skew-x-[10deg]">
                       Race Hub <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
@@ -351,26 +351,26 @@ export default function Dashboard() {
 
           {lastCompletedRace && (
             <div className={`${nextRace ? "col-span-1" : "col-span-1 lg:col-span-3"} relative group animate-slide-up`}>
-              <div className="relative bg-zinc-900/50 border border-zinc-800 rounded-3xl overflow-hidden h-full flex flex-col backdrop-blur-sm p-6">
-                <div className="flex items-center gap-2 text-zinc-500 font-bold uppercase tracking-widest text-xs mb-4">
+              <div className="relative bg-card/80 dark:bg-zinc-900/50 border border-border rounded-3xl overflow-hidden h-full flex flex-col backdrop-blur-sm p-6 shadow-md dark:shadow-none">
+                <div className="flex items-center gap-2 text-muted-foreground font-bold uppercase tracking-widest text-xs mb-4">
                   <History className="w-4 h-4" />
                   Latest Results · R{lastCompletedRace.RoundNumber}
                 </div>
-                <h3 className="text-2xl font-black uppercase italic text-white mb-1">
+                <h3 className="text-2xl font-black uppercase italic text-foreground mb-1">
                   {lastCompletedRace.Location}
                 </h3>
-                <p className="text-zinc-400 text-sm mb-6">
+                <p className="text-muted-foreground text-sm mb-6">
                   {lastCompletedRace.EventName || lastCompletedRace.OfficialEventName}
                 </p>
 
                 <div className="mt-auto">
-                  <div className="p-4 bg-zinc-950/50 rounded-xl border border-zinc-800 mb-4 flex items-center justify-between gap-3">
+                  <div className="p-4 bg-muted/60 dark:bg-zinc-950/50 rounded-xl border border-border mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <div className="text-xs text-zinc-500 uppercase mb-1">Race Winner</div>
-                      <div className="font-bold text-lg text-white">
+                      <div className="text-xs text-muted-foreground uppercase mb-1">Race Winner</div>
+                      <div className="font-bold text-lg text-foreground">
                         {winnerDriver ? winnerDriver.name : "Loading winner..."}
                       </div>
-                      <div className="text-xs text-zinc-400 font-mono">
+                      <div className="text-xs text-muted-foreground font-mono">
                         {winnerDriver ? `${winnerDriver.team}${winnerDriver.time ? ` · ${winnerDriver.time}` : ""}` : "--"}
                       </div>
                     </div>
@@ -381,7 +381,7 @@ export default function Dashboard() {
                       />
                     )}
                   </div>
-                  <Button asChild variant="outline" className="w-full border-zinc-700 hover:bg-zinc-800 hover:text-white uppercase font-bold text-xs">
+                  <Button asChild variant="outline" className="w-full border-border hover:bg-accent uppercase font-bold text-xs">
                     <Link href={`/session/${raceYear}/${encodeURIComponent(lastCompletedRace.Location)}/Race`}>
                       View Full Analysis
                     </Link>
@@ -449,12 +449,12 @@ export default function Dashboard() {
 
         {/* Schedule List */}
         <div className="max-w-5xl mx-auto mt-24 animate-fade-in">
-          <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-12 flex items-center gap-4 border-b border-zinc-800 pb-6">
+          <h3 className="text-3xl font-black uppercase italic tracking-tighter mb-12 flex items-center gap-4 border-b border-border pb-6">
             <Flag className="w-8 h-8 text-red-600" />
             {raceYear} Season Timeline
           </h3>
 
-          <div className="relative border-l-2 border-zinc-800 ml-4 space-y-12 pb-12">
+          <div className="relative border-l-2 border-border ml-4 space-y-12 pb-12">
             {schedule?.events.map((event) => {
               const eventTime = getRaceTimestamp(event)
               const isPast = eventTime <= today
@@ -464,29 +464,29 @@ export default function Dashboard() {
 
               return (
                 <div key={`${event.RoundNumber}-${event.Location}`} className="relative pl-12 group">
-                  <div className={`absolute left-[-9px] top-6 w-4 h-4 rounded-full border-4 border-zinc-950 ${isPast ? "bg-zinc-700" : "bg-red-600"} transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_15px_rgba(220,38,38,0.5)]`} />
+                  <div className={`absolute left-[-9px] top-6 w-4 h-4 rounded-full border-4 border-background ${isPast ? "bg-muted-foreground/50" : "bg-red-600"} transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_15px_rgba(220,38,38,0.5)]`} />
 
-                  <div className={`flex flex-col md:flex-row md:items-center gap-6 p-8 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl hover:bg-zinc-900 hover:border-zinc-600 transition-all duration-300 ${isPast ? "opacity-75 hover:opacity-100" : ""}`}>
+                  <div className={`flex flex-col md:flex-row md:items-center gap-6 p-8 bg-card/70 dark:bg-zinc-900/30 border border-border rounded-2xl hover:bg-card hover:border-zinc-400 dark:hover:bg-zinc-900 dark:hover:border-zinc-600 transition-all duration-300 shadow-sm dark:shadow-none ${isPast ? "opacity-80 hover:opacity-100" : ""}`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-2">
-                        <span className="text-sm font-mono text-zinc-500 bg-zinc-950 px-2 py-1 rounded">R{event.RoundNumber}</span>
-                        {isPast && <Badge variant="secondary" className="text-[10px] bg-zinc-800 text-zinc-400">COMPLETED</Badge>}
+                        <span className="text-sm font-mono text-muted-foreground bg-muted px-2 py-1 rounded">R{event.RoundNumber}</span>
+                        {isPast && <Badge variant="secondary" className="text-[10px]">COMPLETED</Badge>}
                       </div>
-                      <h4 className="text-3xl font-black uppercase italic tracking-tight group-hover:text-red-500 transition-colors duration-300">
+                      <h4 className="text-3xl font-black uppercase italic tracking-tight text-foreground group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors duration-300">
                         {event.Location}
                       </h4>
-                      <div className="text-lg text-zinc-400 font-medium mt-1">
+                      <div className="text-lg text-muted-foreground font-medium mt-1">
                         {event.OfficialEventName}
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 text-sm text-zinc-500 font-mono border-l border-zinc-800 pl-6">
+                    <div className="flex flex-col gap-2 text-sm text-muted-foreground font-mono border-l border-border pl-6">
                       <div className="flex items-center gap-3">
-                        <CalendarDays className="w-4 h-4 text-zinc-400" />
+                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
                         {eventTime.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                       </div>
                       <div className="flex items-center gap-3">
-                        <MapPin className="w-4 h-4 text-zinc-400" />
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
                         {event.Country}
                       </div>
                     </div>

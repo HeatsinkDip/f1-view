@@ -92,7 +92,6 @@ app = FastAPI(title="F1 View API", version="2.0.0")
 import hmac
 import ipaddress
 import logging
-import re
 from fastapi import Depends, Request
 try:
     from .data_providers import sanitize_https_url
@@ -101,8 +100,20 @@ except ImportError:
 
 logger = logging.getLogger("f1view.api")
 
-_LOCATION_RE = re.compile(r"^[A-Za-z0-9 .,'()_-]{1,100}$")
-_SESSION_TYPE_RE = re.compile(r"^[A-Za-z0-9 _-]{1,40}$")
+
+def _validate_safe_text(raw: str, max_len: int, extra_chars: str, error_detail: str) -> str:
+    cleaned = urllib.parse.unquote(raw).strip()
+    if (
+        not cleaned
+        or len(cleaned) > max_len
+        or ".." in cleaned
+        or "/" in cleaned
+        or "\\" in cleaned
+        or any(ord(ch) < 32 or ord(ch) == 127 for ch in cleaned)
+        or not all(ch.isalnum() or ch in extra_chars for ch in cleaned)
+    ):
+        raise HTTPException(status_code=400, detail=error_detail)
+    return cleaned
 
 
 def _validate_year(year: int, min_year: int = 1950, max_year: int = 2035) -> int:
@@ -112,10 +123,7 @@ def _validate_year(year: int, min_year: int = 1950, max_year: int = 2035) -> int
 
 
 def _validate_session_type(session_type: str) -> str:
-    cleaned = urllib.parse.unquote(session_type).strip()
-    if not cleaned or not _SESSION_TYPE_RE.fullmatch(cleaned):
-        raise HTTPException(status_code=400, detail="Invalid session type")
-    return cleaned
+    return _validate_safe_text(session_type, 40, " _-.", "Invalid session type")
 
 
 def _validate_common_path_params(request: Request) -> None:
@@ -220,17 +228,7 @@ def _get_session_lock(key: str) -> Lock:
 
 
 def _clean_location(location: str) -> str:
-    cleaned = urllib.parse.unquote(location).strip()
-    if (
-        not cleaned
-        or ".." in cleaned
-        or "/" in cleaned
-        or "\\" in cleaned
-        or any(ord(ch) < 32 for ch in cleaned)
-        or not _LOCATION_RE.fullmatch(cleaned)
-    ):
-        raise HTTPException(status_code=400, detail="Invalid location parameter")
-    return cleaned
+    return _validate_safe_text(location, 100, " .,'()_-", "Invalid location parameter")
 
 
 def _get_cached_session(year: int, location: str, session_type: str) -> tuple[fastf1.core.Session, str]:

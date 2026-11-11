@@ -16,6 +16,7 @@ import { WeatherRadar } from "@/components/weather-radar"
 import { TeamRadio } from "@/components/team-radio"
 import { TyreAnalysis } from "@/components/tyre-analysis"
 import { F1Loader } from "@/components/f1-loader"
+import { ModeToggle } from "@/components/mode-toggle"
 
 export default function SessionPage() {
     const params = useParams()
