@@ -43,16 +43,16 @@ FALLBACK_DRIVER_IMAGE = (
 )
 
 STATIC_DRIVER_IMAGES = {
-    "VER": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/2col/image.png",
-    "NOR": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png.transform/2col/image.png",
-    "LEC": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/2col/image.png",
-    "PIA": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png.transform/2col/image.png",
-    "SAI": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/2col/image.png",
-    "RUS": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png.transform/2col/image.png",
-    "HAM": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/2col/image.png",
-    "PER": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01.png.transform/2col/image.png",
-    "ALO": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01.png.transform/2col/image.png",
-    "HUL": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/N/NICHUL01_Nico_Hulkenberg/nichul01.png.transform/2col/image.png",
+    "VER": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/9col/image.png",
+    "NOR": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png.transform/9col/image.png",
+    "LEC": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/9col/image.png",
+    "PIA": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png.transform/9col/image.png",
+    "SAI": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/9col/image.png",
+    "RUS": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png.transform/9col/image.png",
+    "HAM": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/9col/image.png",
+    "PER": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01.png.transform/9col/image.png",
+    "ALO": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01.png.transform/9col/image.png",
+    "HUL": "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/N/NICHUL01_Nico_Hulkenberg/nichul01.png.transform/9col/image.png",
 }
 
 TEAM_COLORS = {
@@ -222,9 +222,10 @@ def get_circuit_image(location: str | None) -> str:
 
 import re as _re
 import threading as _threading
-from urllib.parse import urlsplit as _urlsplit
+from urllib.parse import urlsplit as _urlsplit, urlunsplit as _urlunsplit
 
 _f1_auth_lock = _threading.Lock()
+_F1_TRANSFORM_RE = _re.compile(r"\.transform/[^/]+/image\.[a-zA-Z0-9]+$", _re.IGNORECASE)
 
 
 def sanitize_https_url(value: Any, default: str | None = None) -> str | None:
@@ -236,6 +237,35 @@ def sanitize_https_url(value: Any, default: str | None = None) -> str | None:
     if parsed.scheme.lower() != "https" or not parsed.netloc:
         return default
     return s
+
+
+def high_res_driver_image(value: Any) -> str | None:
+    """Upgrade Formula 1 CDN driver headshot URLs from small `.transform/*` thumbnails to 9col high resolution."""
+    url = sanitize_https_url(value)
+    if not url:
+        return None
+    parsed = _urlsplit(url)
+    host = (parsed.hostname or "").lower()
+    if host in {"media.formula1.com", "www.formula1.com"}:
+        upgraded_path = _F1_TRANSFORM_RE.sub(".transform/9col/image.png", parsed.path)
+        if upgraded_path != parsed.path:
+            return _urlunsplit((parsed.scheme, parsed.netloc, upgraded_path, parsed.query, parsed.fragment))
+    return url
+
+
+def resolve_driver_image(
+    headshot_url: Any = None,
+    code: str | None = None,
+    visuals: dict[str, dict[str, str]] | None = None,
+) -> str:
+    """Resolve the highest-resolution driver headshot URL with season visuals and static fallbacks."""
+    visual_img = visuals.get(code, {}).get("image") if visuals and code else None
+    return (
+        high_res_driver_image(headshot_url)
+        or high_res_driver_image(visual_img)
+        or (STATIC_DRIVER_IMAGES.get(code) if code else None)
+        or FALLBACK_DRIVER_IMAGE
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -569,7 +599,7 @@ def openf1_drivers_map(cache_dir: str, session_key: int) -> dict[int, dict[str, 
         )
         team = safe_str(d.get("team_name"), "Unknown")
         color = safe_str(d.get("team_colour")) or get_team_color(team)
-        headshot = sanitize_https_url(d.get("headshot_url")) or STATIC_DRIVER_IMAGES.get(code) or FALLBACK_DRIVER_IMAGE
+        headshot = resolve_driver_image(d.get("headshot_url"), code)
         out[num] = {
             "number": str(num),
             "code": code,

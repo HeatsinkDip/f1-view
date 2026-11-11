@@ -4,10 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Trophy, AlertCircle } from "lucide-react"
-import { getStandings, DriverStanding, ConstructorStanding } from "@/lib/api"
-
-const FALLBACK_AVATAR =
-    "https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/driver_fallback_image.png"
+import { getStandings, DriverStanding, ConstructorStanding, handleDriverImageError, toHighResDriverImage } from "@/lib/api"
 
 interface StandingsWidgetProps {
     year?: number
@@ -104,7 +101,7 @@ export function StandingsWidget({ year = new Date().getFullYear() }: StandingsWi
                             <div className="divide-y divide-border/60 max-h-[460px] overflow-y-auto custom-scrollbar">
                                 {standings.drivers.map((driver) => {
                                     const barColor = teamHex(driver.color)
-                                    const imageUrl = driver.image || FALLBACK_AVATAR
+                                    const imageUrl = toHighResDriverImage(driver.image)
 
                                     return (
                                         <div
@@ -125,9 +122,7 @@ export function StandingsWidget({ year = new Date().getFullYear() }: StandingsWi
                                                     src={imageUrl}
                                                     alt={driver.name}
                                                     className="w-full h-full object-cover object-top transform scale-125 pt-1"
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = FALLBACK_AVATAR
-                                                    }}
+                                                    onError={handleDriverImageError}
                                                 />
                                             </div>
 

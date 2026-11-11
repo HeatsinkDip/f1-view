@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Activity, Map, Trophy, ChevronRight, Play } from "lucide-react"
 import { useEffect, useState } from "react"
-import { getStandings, getSchedule, DriverStanding, Event } from "@/lib/api"
+import { getStandings, getSchedule, DriverStanding, Event, handleDriverImageError, toHighResDriverImage } from "@/lib/api"
 import { ModeToggle } from "@/components/mode-toggle"
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -159,13 +159,13 @@ export default function LandingPage() {
                             category="TECHNICAL"
                             title={`${CURRENT_YEAR} Active Aerodynamics & Power Unit Efficiency`}
                             date={`${CURRENT_YEAR} Season`}
-                            image="https://images.unsplash.com/photo-1532906619279-a798156785c7?q=80&w=2574&auto=format&fit=crop"
+                            image="https://images.unsplash.com/photo-1699138346782-8a8b211c3da2?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
                         />
                         <NewsCard
                             category="STRATEGY"
                             title="Undercut vs Overcut: Analyzing Stint Degradation Across Compounds"
                             date="Race Craft"
-                            image="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=2670&auto=format&fit=crop"
+                            image="https://images.unsplash.com/photo-1652090379496-4219a00c8ebf?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
                         />
                     </div>
                 </div>
@@ -204,7 +204,7 @@ export default function LandingPage() {
                             <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-15 dark:opacity-20 group-hover:opacity-35 blur-2xl transition-opacity duration-700" />
                             <div className="relative rounded-2xl overflow-hidden border border-border dark:border-white/10 aspect-[4/3] shadow-2xl">
                                 <img
-                                    src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=2670&auto=format&fit=crop"
+                                    src="https://images.unsplash.com/photo-1700770956485-87150c75ad65?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
                                     alt="Technical Analysis"
                                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                                 />
@@ -376,7 +376,13 @@ function DriverCard({ name, team, points, image, rank, teamHex }: { name: string
                 style={{ background: `linear-gradient(to bottom, ${teamHex}, rgba(0, 0, 0, 0.9))` }}
             />
             <div className="relative h-[450px] rounded-3xl overflow-hidden border border-border dark:border-white/10 bg-zinc-900 shadow-2xl">
-                <img src={image} alt={name} className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 pt-8" />
+                <img
+                    src={toHighResDriverImage(image)}
+                    alt={name}
+                    decoding="async"
+                    onError={handleDriverImageError}
+                    className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 pt-8"
+                />
 
                 <div className="absolute top-4 left-4 z-20">
                     <div className="w-12 h-12 rounded-xl bg-white text-black font-black flex items-center justify-center text-2xl shadow-lg transform -rotate-3 group-hover:rotate-0 transition-transform">

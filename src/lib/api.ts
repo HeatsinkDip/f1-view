@@ -1,3 +1,5 @@
+import type { SyntheticEvent } from 'react';
+
 // Normalize base URL so both `http://localhost:8001` and `http://localhost:8001/api` work cleanly.
 function normalizeApiBase(rawUrl: string): string {
     const trimmed = rawUrl.replace(/\/+$/, '');
@@ -348,13 +350,45 @@ export async function getSessionDetails(year: number, location: string, sessionT
     );
 }
 
+export const FALLBACK_DRIVER_IMAGE =
+    'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/driver_fallback_image.png';
+
+const F1_TRANSFORM_REGEX = /\.transform\/[^/]+\/image\.[a-zA-Z0-9]+$/i;
+
+export function toHighResDriverImage(url?: string | null): string {
+    if (!url) return FALLBACK_DRIVER_IMAGE;
+    try {
+        const parsed = new URL(url);
+        if (
+            parsed.protocol === 'https:' &&
+            (parsed.hostname === 'media.formula1.com' || parsed.hostname === 'www.formula1.com')
+        ) {
+            parsed.pathname = parsed.pathname.replace(F1_TRANSFORM_REGEX, '.transform/9col/image.png');
+            return parsed.toString();
+        }
+        return url;
+    } catch {
+        return url;
+    }
+}
+
+export function handleDriverImageError(e: SyntheticEvent<HTMLImageElement>): void {
+    const target = e.currentTarget;
+    if (target.dataset.fallbackApplied) return;
+    target.dataset.fallbackApplied = 'true';
+    target.src = FALLBACK_DRIVER_IMAGE;
+}
+
 export async function getSessionDrivers(year: number, location: string, sessionType: string): Promise<Driver[]> {
     const data = await apiFetch<{ drivers: Driver[] }>(
         `${sessionPath('session', year, location, sessionType)}/drivers`,
         undefined,
         'Failed to fetch drivers'
     );
-    return data.drivers;
+    return (data.drivers || []).map((driver) => ({
+        ...driver,
+        image: toHighResDriverImage(driver.image),
+    }));
 }
 
 export async function getDriverTelemetry(
@@ -431,19 +465,32 @@ export async function getTeamRadio(year: number, location: string, sessionType: 
 }
 
 export async function getStandings(year: number): Promise<StandingsResponse> {
-    return apiFetch<StandingsResponse>(
+    const data = await apiFetch<StandingsResponse>(
         `${API_BASE_URL}/standings/${year}`,
         undefined,
         'Failed to fetch standings'
     );
+    return {
+        ...data,
+        drivers: (data.drivers || []).map((driver) => ({
+            ...driver,
+            image: toHighResDriverImage(driver.image),
+        })),
+    };
 }
 
 export async function getRivalry(year: number): Promise<RivalryResponse> {
-    return apiFetch<RivalryResponse>(
+    const data = await apiFetch<RivalryResponse>(
         `${API_BASE_URL}/rivalry/${year}`,
         undefined,
         'Failed to fetch rivalry data'
     );
+    return {
+        rivals: (data.rivals || []).map((rival) => ({
+            ...rival,
+            image: toHighResDriverImage(rival.image),
+        })),
+    };
 }
 
 export async function getHistory(location: string): Promise<HistoryResponse> {

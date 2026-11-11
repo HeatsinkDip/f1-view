@@ -14,8 +14,6 @@ from pydantic import BaseModel
 
 try:
     from .data_providers import (
-        FALLBACK_DRIVER_IMAGE,
-        STATIC_DRIVER_IMAGES,
         fastf1_can_load,
         get_circuit_history,
         get_circuit_image,
@@ -34,6 +32,7 @@ try:
         openf1_get_telemetry,
         openf1_get_track_data,
         openf1_get_weather,
+        resolve_driver_image,
         resolve_openf1_session,
         safe_float,
         safe_int,
@@ -43,8 +42,6 @@ try:
     )
 except ImportError:
     from data_providers import (
-        FALLBACK_DRIVER_IMAGE,
-        STATIC_DRIVER_IMAGES,
         fastf1_can_load,
         get_circuit_history,
         get_circuit_image,
@@ -63,6 +60,7 @@ except ImportError:
         openf1_get_telemetry,
         openf1_get_track_data,
         openf1_get_weather,
+        resolve_driver_image,
         resolve_openf1_session,
         safe_float,
         safe_int,
@@ -476,12 +474,7 @@ def get_session_drivers(year: int, location: str, session_type: str):
                 code = safe_str(row.get("Abbreviation"), str(driver_number))
                 team = safe_str(row.get("TeamName"), "Unknown")
                 color = safe_str(row.get("TeamColor")) or get_team_color(team)
-                headshot = (
-                    sanitize_https_url(row.get("HeadshotUrl"))
-                    or visuals.get(code, {}).get("image")
-                    or STATIC_DRIVER_IMAGES.get(code)
-                    or FALLBACK_DRIVER_IMAGE
-                )
+                headshot = resolve_driver_image(row.get("HeadshotUrl"), code, visuals)
                 drivers.append(
                     {
                         "id": str(driver_number),
@@ -519,9 +512,7 @@ def get_session_drivers(year: int, location: str, session_type: str):
                         "position": None,
                         "time": None,
                         "status": None,
-                        "image": safe_str(info.get("HeadshotUrl"))
-                        or STATIC_DRIVER_IMAGES.get(code)
-                        or FALLBACK_DRIVER_IMAGE,
+                        "image": resolve_driver_image(info.get("HeadshotUrl"), code),
                     }
                 )
 
@@ -1032,11 +1023,7 @@ def get_standings(year: int):
                     full_name = f"{given} {family}".strip()
                     code = safe_str(row.get("driverCode")) or family[:3].upper()
                     vis = visuals.get(code, {})
-                    image = (
-                        vis.get("image")
-                        or STATIC_DRIVER_IMAGES.get(code)
-                        or FALLBACK_DRIVER_IMAGE
-                    )
+                    image = resolve_driver_image(None, code, visuals)
                     color = vis.get("color") or get_team_color(team_name)
 
                     drivers_data.append(
@@ -1121,9 +1108,7 @@ def get_rivalry(year: int):
                     "color": color.lstrip("#"),
                     "points": safe_float(row.get("points"), 0.0),
                     "wins": safe_int(row.get("wins"), 0),
-                    "image": vis.get("image")
-                    or STATIC_DRIVER_IMAGES.get(code)
-                    or FALLBACK_DRIVER_IMAGE,
+                    "image": resolve_driver_image(None, code, visuals),
                 }
             )
 
